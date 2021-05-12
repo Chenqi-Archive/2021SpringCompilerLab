@@ -21,16 +21,39 @@ struct VarRef {
 
 struct VarEntry {
 private:
+	static constexpr uint max_constexpr_array_length = 65536;
+	static constexpr int local_variable_initial_value = 0xCCCCCCCC;
+
+private:
 	const bool is_const;
 	const vector<uint> array_dimension;
-	vector<int> content;
+	const vector<int> content;
 
+private:
+	static uint CalculateArrayLength(const vector<uint>& array_dimension) {
+		uint length = 1;
+		for (uint length_i : array_dimension) {
+			assert(length_i > 0);
+			uint64 current_length = (uint64)length * (uint64)length_i;
+			length = (uint)current_length;
+			if ((uint64)length != current_length) { throw compile_error("array too large"); }
+		}
+		return length;
+	}
+
+	vector<int> GetInitialContent(bool is_global) {
+		if (is_const) {
+			uint length = CalculateArrayLength(array_dimension);
+			if (length > max_constexpr_array_length) { throw compile_error("array too large for constexpr evaluation"); }
+			return vector<int>(length, is_global ? 0 : local_variable_initial_value);
+		} else {
+			return vector<int>();
+		}
+	}
+	
 public:
 	VarEntry(bool is_const, bool is_global, vector<uint>&& array_dimension) :
-		is_const(is_const), array_dimension(array_dimension) {
-		try {
-			content.assign(CalculateArrayLength(array_dimension), is_global ? 0 : 0xCCCCCCCC);
-		} catch (std::bad_alloc&) { throw compile_error("array is too large"); }
+		is_const(is_const), array_dimension(array_dimension), content(GetInitialContent(is_global)) {
 	}
 	bool IsConst() const { return is_const; }
 	VarRef ReadAt(const vector<uint>& subscript) {
@@ -42,17 +65,6 @@ public:
 
 	}
 
-private:
-	static uint CalculateArrayLength(const vector<uint>& array_dimension) {
-		uint length = 1;
-		for (uint length_i : array_dimension) {
-			assert(length_i > 0);
-			uint64 current_length = (uint64)length * (uint64)length_i;
-			length = (uint)current_length;
-			if ((uint64)length != current_length) { throw compile_error("array is too large"); }
-		}
-		return length;
-	}
 };
 
 using VarTable = unordered_map<string_view, VarEntry>;

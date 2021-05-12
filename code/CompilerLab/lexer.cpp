@@ -7,7 +7,7 @@ enum class CharType : uchar {
     Operator = 2,     // "%&*+-/<=>|"
     Comma = 3,        // ","
     Semicolon = 4,    // ";"
-    WhiteSpace = 5,   // " \t\n"
+    WhiteSpace = 5,   // " \t\r\n"
     LeftBracket = 6,  // "([{"
     RightBracket = 7, // ")]}"
     End = 8,          // "\0"

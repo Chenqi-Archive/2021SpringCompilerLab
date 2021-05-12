@@ -327,7 +327,7 @@ void Parser::ReadNodeVarDef(item_const_iterator& it) {
 
 	// identifier[][]... = initialize-list, ... ;
 	do {
-		Node_VarDef node_var_def;
+		AstNode_VarDef node_var_def;
 		node_var_def.is_const = is_const;
 
 		// identifier
@@ -344,7 +344,7 @@ void Parser::ReadNodeVarDef(item_const_iterator& it) {
 			node_var_def.initializer_list = std::make_unique<InitializerList>(ReadInitializerList(it));
 		}
 
-		AppendNode(std::make_unique<Node_VarDef>(std::move(node_var_def)));
+		AppendNode(std::make_unique<AstNode_VarDef>(std::move(node_var_def)));
 
 		// ;
 		if (it == it_end) { throw compile_error("expected a ';'"); }
@@ -358,7 +358,7 @@ void Parser::ReadNodeVarDef(item_const_iterator& it) {
 }
 
 void Parser::ReadNodeFuncDef(item_const_iterator& it) {
-	Node_FuncDef node_func_def;
+	AstNode_FuncDef node_func_def;
 
 	// void or int
 	assert(it != it_end);
@@ -389,14 +389,14 @@ void Parser::ReadNodeFuncDef(item_const_iterator& it) {
 	node_func_def.block = ReadBlock(it.As<Item_Block>());
 	it++;
 
-	AppendNode(std::make_unique<Node_FuncDef>(std::move(node_func_def)));
+	AppendNode(std::make_unique<AstNode_FuncDef>(std::move(node_func_def)));
 }
 
 void Parser::ReadNodeExp(item_const_iterator& it) {
-	Node_Exp node_exp;
+	AstNode_Exp node_exp;
 	node_exp.expression = ReadExpTree(it); // expression
 	ReadSemicolon(it); // ';'
-	AppendNode(std::make_unique<Node_Exp>(std::move(node_exp)));
+	AppendNode(std::make_unique<AstNode_Exp>(std::move(node_exp)));
 }
 
 void Parser::ReadNodeBlock(item_const_iterator& it) {
@@ -404,10 +404,10 @@ void Parser::ReadNodeBlock(item_const_iterator& it) {
 	assert(it != it_end);
 	assert(it->GetType() == ItemType::Block);
 	assert(it.As<Item_Block>().bracket_type == BracketType::Curly);
-	Node_Block node_block;
+	AstNode_Block node_block;
 	node_block.block = ReadBlock(it.As<Item_Block>());
 	it++;
-	AppendNode(std::make_unique<Node_Block>(std::move(node_block)));
+	AppendNode(std::make_unique<AstNode_Block>(std::move(node_block)));
 }
 
 void Parser::ReadNodeIf(item_const_iterator& it) {
@@ -417,7 +417,7 @@ void Parser::ReadNodeIf(item_const_iterator& it) {
 	assert(it.As<Item_Keyword>().keyword_type == KeywordType::If);
 	it++;
 
-	Node_If node_if;
+	AstNode_If node_if;
 
 	// ()
 	if (it == it_end || it->GetType() != ItemType::Block || it.As<Item_Block>().bracket_type != BracketType::Round) {
@@ -439,7 +439,7 @@ void Parser::ReadNodeIf(item_const_iterator& it) {
 		node_if.else_block = ReadSingleNodeOrBlock(it);
 	}
 
-	AppendNode(std::make_unique<Node_If>(std::move(node_if)));
+	AppendNode(std::make_unique<AstNode_If>(std::move(node_if)));
 }
 
 void Parser::ReadNodeWhile(item_const_iterator& it) {
@@ -449,7 +449,7 @@ void Parser::ReadNodeWhile(item_const_iterator& it) {
 	assert(it.As<Item_Keyword>().keyword_type == KeywordType::While);
 	it++;
 
-	Node_While node_while;
+	AstNode_While node_while;
 
 	// ()
 	if (it == it_end || it->GetType() != ItemType::Block || it.As<Item_Block>().bracket_type != BracketType::Round) {
@@ -462,7 +462,7 @@ void Parser::ReadNodeWhile(item_const_iterator& it) {
 	if (it == it_end) { throw compile_error("expected a statement"); }
 	node_while.block = ReadSingleNodeOrBlock(it);
 
-	AppendNode(std::make_unique<Node_While>(std::move(node_while)));
+	AppendNode(std::make_unique<AstNode_While>(std::move(node_while)));
 }
 
 void Parser::ReadNodeBreak(item_const_iterator& it) {
@@ -475,7 +475,7 @@ void Parser::ReadNodeBreak(item_const_iterator& it) {
 	// ';'
 	ReadSemicolon(it);
 
-	AppendNode(std::make_unique<Node_Break>());
+	AppendNode(std::make_unique<AstNode_Break>());
 }
 
 void Parser::ReadNodeContinue(item_const_iterator& it) {
@@ -488,7 +488,7 @@ void Parser::ReadNodeContinue(item_const_iterator& it) {
 	// ';'
 	ReadSemicolon(it);
 
-	AppendNode(std::make_unique<Node_Continue>());
+	AppendNode(std::make_unique<AstNode_Continue>());
 }
 
 void Parser::ReadNodeReturn(item_const_iterator& it) {
@@ -498,7 +498,7 @@ void Parser::ReadNodeReturn(item_const_iterator& it) {
 	assert(it.As<Item_Keyword>().keyword_type == KeywordType::Return);
 	it++;
 
-	Node_Return node_return;
+	AstNode_Return node_return;
 
 	// expression
 	node_return.expression = ReadExpTree(it);
@@ -506,7 +506,7 @@ void Parser::ReadNodeReturn(item_const_iterator& it) {
 	// ';'
 	ReadSemicolon(it);
 
-	AppendNode(std::make_unique<Node_Return>(std::move(node_return)));
+	AppendNode(std::make_unique<AstNode_Return>(std::move(node_return)));
 }
 
 void Parser::ReadNode(item_const_iterator& it) {

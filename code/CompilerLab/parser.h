@@ -65,7 +65,7 @@ private:
 	ArgumentList ReadArgumentList(const Item_Block& lex_block);
 
 private:
-	void AppendNode(unique_ptr<Node_Base> node) { current_block->push_back(std::move(node)); }
+	void AppendNode(unique_ptr<AstNode_Base> node) { current_block->push_back(std::move(node)); }
 
 private:
 	void ReadSemicolon(item_const_iterator& it);

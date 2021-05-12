@@ -103,68 +103,68 @@ private:
 		cout << indent(level) << ')' << endl;
 	}
 
-	void PrintNode(const Node_Base& node, uint level) {
+	void PrintNode(const AstNode_Base& node, uint level) {
 		switch (node.GetType()) {
-		case NodeType::VarDef: 
+		case AstNodeType::VarDef: 
 			{
-				auto& node_var_def = node.As<Node_VarDef>();
+				auto& node_var_def = node.As<AstNode_VarDef>();
 				cout << indent(level) << (node_var_def.is_const ? "const int" : "int") << endl;
 				cout << indent(level) << node_var_def.identifier << endl;
 				PrintArrayDimension(node_var_def.array_dimension, level);
 				if (node_var_def.initializer_list != nullptr) { PrintInitializerList(*node_var_def.initializer_list, level); }
 			}
 			break;
-		case NodeType::FuncDef:
+		case AstNodeType::FuncDef:
 			{
-				auto& node_func_def = node.As<Node_FuncDef>();
+				auto& node_func_def = node.As<AstNode_FuncDef>();
 				cout << indent(level) << (node_func_def.is_int ? "int" : "void") << endl;
 				cout << indent(level) << node_func_def.identifier << endl;
 				PrintParameterList(node_func_def.parameter_list, level);
 				PrintBlock(node_func_def.block, level);
 			}
 			break;
-		case NodeType::Exp:
+		case AstNodeType::Exp:
 			{
-				auto& node_exp = node.As<Node_Exp>();
+				auto& node_exp = node.As<AstNode_Exp>();
 				PrintExpTree(node_exp.expression, level);
 			}
 			break;
-		case NodeType::Block:
+		case AstNodeType::Block:
 			{
-				auto& node_block = node.As<Node_Block>();
+				auto& node_block = node.As<AstNode_Block>();
 				PrintBlock(node_block.block, level);
 			}
 			break;
-		case NodeType::If:
+		case AstNodeType::If:
 			{
-				auto& node_if = node.As<Node_If>();
+				auto& node_if = node.As<AstNode_If>();
 				cout << indent(level) << "if" << endl;
 				PrintExpTree(node_if.expression, level);
 				PrintBlock(node_if.then_block, level);
 				PrintBlock(node_if.else_block, level);
 			}
 			break;
-		case NodeType::While:
+		case AstNodeType::While:
 			{
-				auto& node_while = node.As<Node_While>();
+				auto& node_while = node.As<AstNode_While>();
 				cout << indent(level) << "while" << endl;
 				PrintExpTree(node_while.expression, level);
 				PrintBlock(node_while.block, level);
 			}
 			break;
-		case NodeType::Break:
+		case AstNodeType::Break:
 			{
 				cout << indent(level) << "break" << endl;
 			}
 			break;
-		case NodeType::Continue:
+		case AstNodeType::Continue:
 			{
 				cout << indent(level) << "continue" << endl;
 			}
 			break;
-		case NodeType::Return:
+		case AstNodeType::Return:
 			{
-				auto& node_return = node.As<Node_Return>();
+				auto& node_return = node.As<AstNode_Return>();
 				cout << indent(level) << "return" << endl;
 				PrintExpTree(node_return.expression, level);
 			}

@@ -4,7 +4,7 @@
 
 
 // statement (or AST node) type
-enum class NodeType {
+enum class AstNodeType {
 	VarDef,
 	FuncDef,
 	Exp,
@@ -17,21 +17,21 @@ enum class NodeType {
 };
 
 
-struct ABSTRACT_BASE Node_Base {
+struct ABSTRACT_BASE AstNode_Base {
 private:
-	NodeType type;
+	AstNodeType type;
 protected:
-	Node_Base(NodeType type) : type(type) {}
+	AstNode_Base(AstNodeType type) : type(type) {}
 public:
-	NodeType GetType() const { return type; }
-	virtual ~Node_Base() pure {}
+	AstNodeType GetType() const { return type; }
+	virtual ~AstNode_Base() pure {}
 public:
 	template<class DerivedClass>
 	const DerivedClass& As() const { return static_cast<const DerivedClass&>(*this); }
 };
 
 
-using Block = vector<unique_ptr<Node_Base>>;
+using Block = vector<unique_ptr<AstNode_Base>>;
 using SyntaxTree = Block;
 
 
@@ -46,14 +46,14 @@ public:
 using ArrayDimension = vector<ExpTree>;
 using ListOfInitializerList = vector<InitializerList>;
 
-struct Node_VarDef : public Node_Base {
+struct AstNode_VarDef : public AstNode_Base {
 public:
 	string_view identifier;
 	ArrayDimension array_dimension;
 	unique_ptr<InitializerList> initializer_list;
 	bool is_const = false;
 public:
-	Node_VarDef() : Node_Base(NodeType::VarDef) {}
+	AstNode_VarDef() : AstNode_Base(AstNodeType::VarDef) {}
 };
 
 
@@ -64,67 +64,67 @@ struct ParameterDef {
 
 using ParameterList = vector<ParameterDef>;
 
-struct Node_FuncDef : public Node_Base {
+struct AstNode_FuncDef : public AstNode_Base {
 public:
 	string_view identifier;
 	ParameterList parameter_list;
 	Block block;
 	bool is_int = false;
 public:
-	Node_FuncDef() : Node_Base(NodeType::FuncDef) {}
+	AstNode_FuncDef() : AstNode_Base(AstNodeType::FuncDef) {}
 };
 
 
-struct Node_Exp : public Node_Base {
+struct AstNode_Exp : public AstNode_Base {
 public:
 	ExpTree expression;
 public:
-	Node_Exp() : Node_Base(NodeType::Exp) {}
+	AstNode_Exp() : AstNode_Base(AstNodeType::Exp) {}
 };
 
 
-struct Node_Block : public Node_Base {
+struct AstNode_Block : public AstNode_Base {
 public:
 	Block block;
 public:
-	Node_Block() : Node_Base(NodeType::Block) {}
+	AstNode_Block() : AstNode_Base(AstNodeType::Block) {}
 };
 
 
-struct Node_If : public Node_Base {
+struct AstNode_If : public AstNode_Base {
 public:
 	ExpTree expression;
 	Block then_block;
 	Block else_block;
 public:
-	Node_If() : Node_Base(NodeType::If) {}
+	AstNode_If() : AstNode_Base(AstNodeType::If) {}
 };
 
 
-struct Node_While : public Node_Base {
+struct AstNode_While : public AstNode_Base {
 public:
 	ExpTree expression;
 	Block block;
 public:
-	Node_While() : Node_Base(NodeType::While) {}
+	AstNode_While() : AstNode_Base(AstNodeType::While) {}
 };
 
 
-struct Node_Break : public Node_Base {
+struct AstNode_Break : public AstNode_Base {
 public:
-	Node_Break() : Node_Base(NodeType::Break) {}
+	AstNode_Break() : AstNode_Base(AstNodeType::Break) {}
 };
 
 
-struct Node_Continue : public Node_Base {
+struct AstNode_Continue : public AstNode_Base {
 public:
-	Node_Continue() : Node_Base(NodeType::Continue) {}
+	AstNode_Continue() : AstNode_Base(AstNodeType::Continue) {}
 };
 
 
-struct Node_Return : public Node_Base {
+struct AstNode_Return : public AstNode_Base {
 public:
 	ExpTree expression;
 public:
-	Node_Return() : Node_Base(NodeType::Return) {}
+	AstNode_Return() : AstNode_Base(AstNodeType::Return) {}
 };
