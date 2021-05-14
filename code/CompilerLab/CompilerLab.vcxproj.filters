@@ -45,6 +45,18 @@
     <ClInclude Include="parser_debug_helper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="linear_code.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="linear_code_printer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="symbol_table.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="analyzer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -57,6 +69,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="parser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="analyzer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
