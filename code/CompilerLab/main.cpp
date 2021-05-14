@@ -1,6 +1,5 @@
 #include "lexer.h"
 #include "parser.h"
-#include "semantic_checker.h"
 
 #include "lexer_debug_helper.h"
 #include "parser_debug_helper.h"
@@ -13,15 +12,8 @@
 const std::string ReadFileToString(const char input_file[]) {
 	std::ifstream file(input_file);
 	if (!file) { throw std::invalid_argument("invalid input file"); }
-	// inefficient here
 	std::stringstream buffer; buffer << file.rdbuf();
 	return buffer.str();
-}
-
-void WriteFileFromString(const char output_file[], const std::string& str) {
-	std::ofstream file(output_file);
-	if (!file) { throw std::invalid_argument("invalid output file"); }
-	file << str;
 }
 
 
@@ -58,14 +50,6 @@ int debug_main() {
 		ParserDebugHelper parser_debug_helper;
 		parser_debug_helper.PrintSyntaxTree(syntax_tree);
 
-
-		SemanticChecker semantic_checker;
-		try {
-			semantic_checker.CheckSyntaxTree(syntax_tree);
-		} catch (compile_error& error) {
-			std::cerr << "semantic error: " << error.what() << std::endl;
-			continue;
-		}
 
 
 	}

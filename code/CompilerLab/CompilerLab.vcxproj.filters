@@ -24,9 +24,6 @@
     <ClInclude Include="core.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="generator.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="lex_tree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -39,9 +36,6 @@
     <ClInclude Include="lexer_debug_helper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="semantic_checker.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="reversion_wrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -49,24 +43,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="parser_debug_helper.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="symbol_table.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="flow_graph.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="analyzer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="runtime_flow_graph.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="interpreter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="program.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -81,9 +57,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="parser.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="analyzer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

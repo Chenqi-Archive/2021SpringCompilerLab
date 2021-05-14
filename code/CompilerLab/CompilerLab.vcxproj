@@ -151,27 +151,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="analyzer.h" />
     <ClInclude Include="core.h" />
-    <ClInclude Include="flow_graph.h" />
-    <ClInclude Include="interpreter.h" />
     <ClInclude Include="lexer_debug_helper.h" />
     <ClInclude Include="exp_tree.h" />
-    <ClInclude Include="generator.h" />
     <ClInclude Include="keyword.h" />
     <ClInclude Include="lexer.h" />
     <ClInclude Include="lex_tree.h" />
     <ClInclude Include="parser.h" />
     <ClInclude Include="parser_debug_helper.h" />
-    <ClInclude Include="program.h" />
     <ClInclude Include="reversion_wrapper.h" />
-    <ClInclude Include="runtime_flow_graph.h" />
-    <ClInclude Include="semantic_checker.h" />
-    <ClInclude Include="symbol_table.h" />
     <ClInclude Include="syntax_tree.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="analyzer.cpp" />
     <ClCompile Include="keyword.cpp" />
     <ClCompile Include="lexer.cpp" />
     <ClCompile Include="main.cpp" />
