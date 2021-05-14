@@ -74,13 +74,13 @@ private:
 		cout << indent(level) << ']' << endl;
 	}
 
-	void PrintInitializerList(const InitializerList& initializer_list, uint level) {
-		if (initializer_list.IsExpression()) {
-			PrintExpTree(initializer_list.expression, level);
+	void PrintInitializer(const Initializer& initializer, uint level) {
+		if (initializer.IsExpression()) {
+			PrintExpTree(initializer.expression, level);
 		} else {
 			cout << indent(level) << '{' << endl;
-			for (auto& child_initializer_list : initializer_list.list_of_initializer_list) {
-				PrintInitializerList(child_initializer_list, level + 1);
+			for (auto& child_initializer : initializer.initializer_list) {
+				PrintInitializer(child_initializer, level + 1);
 			}
 			cout << indent(level) << '}' << endl;
 		}
@@ -111,7 +111,7 @@ private:
 				cout << indent(level) << (node_var_def.is_const ? "const int" : "int") << endl;
 				cout << indent(level) << node_var_def.identifier << endl;
 				PrintArrayDimension(node_var_def.array_dimension, level);
-				if (node_var_def.initializer_list != nullptr) { PrintInitializerList(*node_var_def.initializer_list, level); }
+				if (node_var_def.initializer != nullptr) { PrintInitializer(*node_var_def.initializer, level); }
 			}
 			break;
 		case AstNodeType::FuncDef:

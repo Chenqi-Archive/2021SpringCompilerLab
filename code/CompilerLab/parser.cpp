@@ -194,12 +194,12 @@ ArrayDimension Parser::ReadArrayDimension(item_const_iterator& it) {
 	return array_dimension;
 }
 
-ListOfInitializerList Parser::ReadListOfInitializerList(const Item_Block& lex_block) {
+InitializerList Parser::ReadInitializerList(const Item_Block& lex_block) {
 	assert(lex_block.bracket_type == BracketType::Curly);
 
 	if (lex_block.item_list.empty()) { return {}; }
 
-	ListOfInitializerList list_of_initializer_list;
+	InitializerList initializer_list;
 
 	item_const_iterator old_it_end = it_end;
 	it_end = lex_block.item_list.end();
@@ -208,7 +208,7 @@ ListOfInitializerList Parser::ReadListOfInitializerList(const Item_Block& lex_bl
 	for (item_const_iterator it = lex_block.item_list.begin(); it != it_end;) {
 
 		// initializer-list
-		list_of_initializer_list.push_back(ReadInitializerList(it));
+		initializer_list.push_back(ReadInitializer(it));
 
 		if (it == it_end) { break; }
 
@@ -218,19 +218,19 @@ ListOfInitializerList Parser::ReadListOfInitializerList(const Item_Block& lex_bl
 	}
 
 	it_end = old_it_end;
-	return list_of_initializer_list;
+	return initializer_list;
 }
 
-InitializerList Parser::ReadInitializerList(item_const_iterator& it) {
-	InitializerList initializer_list;
-	if (it == it_end) { throw compile_error("expected an initializer-list"); }
+Initializer Parser::ReadInitializer(item_const_iterator& it) {
+	Initializer initializer;
+	if (it == it_end) { throw compile_error("expected an initializer"); }
 	if (it->GetType() == ItemType::Block && it.As<Item_Block>().bracket_type == BracketType::Curly) {
-		initializer_list.list_of_initializer_list = ReadListOfInitializerList(it.As<Item_Block>()); it++;
+		initializer.initializer_list = ReadInitializerList(it.As<Item_Block>()); it++;
 	} else {
-		initializer_list.expression = ReadExpTree(it);
-		if (initializer_list.expression == nullptr) { throw compile_error("expected an expression"); }
+		initializer.expression = ReadExpTree(it);
+		if (initializer.expression == nullptr) { throw compile_error("expected an expression"); }
 	}
-	return initializer_list;
+	return initializer;
 }
 
 ParameterList Parser::ReadParameterList(const Item_Block& lex_block) {
@@ -336,12 +336,12 @@ void Parser::ReadNodeVarDef(item_const_iterator& it) {
 		// array dimension
 		node_var_def.array_dimension = ReadArrayDimension(it);
 
-		// = initializer-list
+		// = initializer
 		if (it != it_end && it->GetType() == ItemType::Operator && it.As<Item_Operator>().op == OperatorType::Assign) {
 			it++;
 
-			// initializer-list
-			node_var_def.initializer_list = std::make_unique<InitializerList>(ReadInitializerList(it));
+			// initializer
+			node_var_def.initializer = std::make_unique<Initializer>(ReadInitializer(it));
 		}
 
 		AppendNode(std::make_unique<AstNode_VarDef>(std::move(node_var_def)));

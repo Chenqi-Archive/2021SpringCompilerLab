@@ -83,3 +83,6 @@ public:
 };
 
 using FuncTable = unordered_map<string_view, FuncEntry>;
+
+
+using LocalVarInitializerList = vector<std::pair<uint, const ExpTree&>>;  // (index, exp_tree)

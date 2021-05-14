@@ -59,8 +59,8 @@ private:
 	Block ReadBlock(const Item_Block& lex_block);
 	Block ReadSingleNodeOrBlock(item_const_iterator& it);
 	ArrayDimension ReadArrayDimension(item_const_iterator& it);
-	ListOfInitializerList ReadListOfInitializerList(const Item_Block& lex_block);
-	InitializerList ReadInitializerList(item_const_iterator& it);
+	InitializerList ReadInitializerList(const Item_Block& lex_block);
+	Initializer ReadInitializer(item_const_iterator& it);
 	ParameterList ReadParameterList(const Item_Block& lex_block);
 	ArgumentList ReadArgumentList(const Item_Block& lex_block);
 

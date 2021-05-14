@@ -35,22 +35,22 @@ using Block = vector<unique_ptr<AstNode_Base>>;
 using SyntaxTree = Block;
 
 
-struct InitializerList {  // used like a union
+struct Initializer {  // used like a union
 public:
 	ExpTree expression;  // as a single expression
-	vector<InitializerList> list_of_initializer_list;  // as a list of InitializerList
+	vector<Initializer> initializer_list;  // as a list of Initializer
 public:
 	bool IsExpression() const { return expression != nullptr; }
 };
 
 using ArrayDimension = vector<ExpTree>;
-using ListOfInitializerList = vector<InitializerList>;
+using InitializerList = vector<Initializer>;
 
 struct AstNode_VarDef : public AstNode_Base {
 public:
 	string_view identifier;
 	ArrayDimension array_dimension;
-	unique_ptr<InitializerList> initializer_list;
+	unique_ptr<Initializer> initializer;
 	bool is_const = false;
 public:
 	AstNode_VarDef() : AstNode_Base(AstNodeType::VarDef) {}

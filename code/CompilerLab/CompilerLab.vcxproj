@@ -163,6 +163,7 @@
     <ClInclude Include="lex_tree.h" />
     <ClInclude Include="parser.h" />
     <ClInclude Include="parser_debug_helper.h" />
+    <ClInclude Include="program.h" />
     <ClInclude Include="reversion_wrapper.h" />
     <ClInclude Include="runtime_flow_graph.h" />
     <ClInclude Include="semantic_checker.h" />
@@ -170,6 +171,7 @@
     <ClInclude Include="syntax_tree.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="analyzer.cpp" />
     <ClCompile Include="keyword.cpp" />
     <ClCompile Include="lexer.cpp" />
     <ClCompile Include="main.cpp" />
