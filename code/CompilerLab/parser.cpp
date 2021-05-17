@@ -341,7 +341,7 @@ void Parser::ReadNodeVarDef(item_const_iterator& it) {
 			it++;
 
 			// initializer
-			node_var_def.initializer = std::make_unique<Initializer>(ReadInitializer(it));
+			node_var_def.initializer_list.push_back(ReadInitializer(it));
 		}
 
 		AppendNode(std::make_unique<AstNode_VarDef>(std::move(node_var_def)));

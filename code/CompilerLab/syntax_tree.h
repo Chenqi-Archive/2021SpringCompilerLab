@@ -50,7 +50,7 @@ struct AstNode_VarDef : public AstNode_Base {
 public:
 	string_view identifier;
 	ArrayDimension array_dimension;
-	unique_ptr<Initializer> initializer;
+	InitializerList initializer_list;  // with zero or one element
 	bool is_const = false;
 public:
 	AstNode_VarDef() : AstNode_Base(AstNodeType::VarDef) {}

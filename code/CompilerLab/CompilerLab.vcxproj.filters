@@ -48,7 +48,7 @@
     <ClInclude Include="linear_code.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="linear_code_printer.h">
+    <ClInclude Include="analyzer_debug_helper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="symbol_table.h">
@@ -72,6 +72,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="analyzer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="symbol_table.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

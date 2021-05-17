@@ -60,6 +60,36 @@ int GetBinaryOperatorPriority(OperatorType op) {
 	return GetOperatorInfo(op).priority;
 }
 
+int EvalUnaryOperator(OperatorType op, int value) {
+	switch (op) {
+	case OperatorType::Add: return value;
+	case OperatorType::Sub: return -value;
+	case OperatorType::Not: return (int)!(bool)value;
+	default: assert(false); return 0;
+	}
+}
+
+int EvalBinaryOperator(OperatorType op, int value_left, int value_right) {
+	switch (op) {
+	case OperatorType::Add: return value_left + value_right;
+	case OperatorType::Sub: return value_left - value_right;
+	case OperatorType::Mul: return value_left * value_right;
+	case OperatorType::Div: return value_left / value_right;
+	case OperatorType::Mod: return value_left % value_right;
+	case OperatorType::Assign: throw compile_error("expression must be a modifiable lvalue");
+	case OperatorType::And: return (int)((bool)value_left && (bool)value_right);
+	case OperatorType::Or: return (int)((bool)value_left || (bool)value_right);
+	case OperatorType::Not: assert(false); return 0;
+	case OperatorType::Equal: return (int)(value_left == value_right);
+	case OperatorType::NotEqual: return (int)(value_left != value_right);
+	case OperatorType::Less: return (int)(value_left < value_right);
+	case OperatorType::Greater: return (int)(value_left > value_right);
+	case OperatorType::LessEqual: return (int)(value_left <= value_right);
+	case OperatorType::GreaterEuqal: return (int)(value_left >= value_right);
+	default: assert(false); return 0;
+	}
+}
+
 
 struct BracketInfo {
 	char left;

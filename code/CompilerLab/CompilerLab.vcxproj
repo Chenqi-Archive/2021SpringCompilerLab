@@ -158,7 +158,7 @@
     <ClInclude Include="keyword.h" />
     <ClInclude Include="lexer.h" />
     <ClInclude Include="lex_tree.h" />
-    <ClInclude Include="linear_code_printer.h" />
+    <ClInclude Include="analyzer_debug_helper.h" />
     <ClInclude Include="parser.h" />
     <ClInclude Include="parser_debug_helper.h" />
     <ClInclude Include="reversion_wrapper.h" />
@@ -172,6 +172,7 @@
     <ClCompile Include="lexer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="parser.cpp" />
+    <ClCompile Include="symbol_table.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

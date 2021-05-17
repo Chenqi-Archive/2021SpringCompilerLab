@@ -1,8 +1,10 @@
 #include "lexer.h"
 #include "parser.h"
+#include "analyzer.h"
 
 #include "lexer_debug_helper.h"
 #include "parser_debug_helper.h"
+#include "analyzer_debug_helper.h"
 
 #include <iostream>
 #include <fstream>
@@ -36,8 +38,7 @@ int debug_main() {
 			std::cerr << "lex error: " << error.what() << std::endl;
 			continue;
 		}
-		//LexerDebugHelper lexer_debug_helper;
-		//lexer_debug_helper.PrintLexTree(lex_tree);
+		//LexerDebugHelper().PrintLexTree(lex_tree);
 
 
 		Parser parser; SyntaxTree syntax_tree;
@@ -47,9 +48,17 @@ int debug_main() {
 			std::cerr << "syntax error: " << error.what() << std::endl;
 			continue;
 		}
-		ParserDebugHelper parser_debug_helper;
-		parser_debug_helper.PrintSyntaxTree(syntax_tree);
+		//ParserDebugHelper().PrintSyntaxTree(syntax_tree);
 
+
+		Analyzer analyzer; LinearCode linear_code;
+		try {
+			linear_code = analyzer.ReadSyntaxTree(syntax_tree);
+		} catch (compile_error& error) {
+			std::cerr << "semantic error: " << error.what() << std::endl;
+			continue;
+		}
+		AnalyzerDebugHelper().PrintLinearCode(linear_code);
 
 
 	}

@@ -37,7 +37,7 @@ public:
 			cout << "\t" << VarInfo(line, 0) << " = " << VarInfo(line, 1) << "[" << VarInfo(line, 2) << "]" << endl;
 			break;
 		case LineType::Store:
-			cout << "\t" << VarInfo(line, 1) << "[" << VarInfo(line, 2) << "]" << " = " << VarInfo(line, 0) << endl;
+			cout << "\t" << VarInfo(line, 0) << "[" << VarInfo(line, 1) << "]" << " = " << VarInfo(line, 2) << endl;
 			break;
 		case LineType::Parameter:
 			cout << "\tparam " << VarInfo(line, 0) << endl;
@@ -67,21 +67,18 @@ public:
 };
 
 
-class LinearCodePrinter {
+class AnalyzerDebugHelper {
 private:
 	void PrintGlobalVar(const GlobalVarTable& global_var_table) {
-		uint counter = 0;
-		for (auto& global_var : global_var_table) {
-			cout << "g" << counter++ << ": " << global_var.length << endl;
-			for (auto& [index, val] : global_var.initializing_list) {
-				cout << "\t[" << index << "] " << val << endl;
-			}
+		cout << global_var_table.length << endl;
+		for (auto& [index, val] : global_var_table.initializing_list) {
+			cout << "\t[" << index << "] " << val << endl;
 		}
 	}
 	void PrintGlobalFunc(const GlobalFuncTable& global_func_table) {
 		uint counter = 0;
 		for (auto& global_func : global_func_table) {
-			cout << "func" << counter++ << ": " << global_func.parameter_count << " " << global_func.local_var_count << endl;
+			cout << "func" << counter++ << ": " << global_func.parameter_count << " " << global_func.local_var_length << endl;
 			for (auto& line : global_func.code_block) {
 				CodeLinePrinter::PrintCodeLine(line);
 			}

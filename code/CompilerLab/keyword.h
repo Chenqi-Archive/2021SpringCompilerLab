@@ -37,6 +37,9 @@ bool IsUnaryOperator(OperatorType op);
 bool IsBinaryOperator(OperatorType op);
 int GetBinaryOperatorPriority(OperatorType op);  // (highest) 0 --- 8 (lowest)
 
+int EvalUnaryOperator(OperatorType op, int value);
+int EvalBinaryOperator(OperatorType op, int value_left, int value_right);
+
 
 enum class BracketType : uchar {
 	Round,	 // ()
