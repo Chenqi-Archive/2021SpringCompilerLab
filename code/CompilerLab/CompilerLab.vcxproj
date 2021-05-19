@@ -165,6 +165,7 @@
     <ClInclude Include="symbol_table.h" />
     <ClInclude Include="syntax_tree.h" />
     <ClInclude Include="linear_code.h" />
+    <ClInclude Include="type_info.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="analyzer.cpp" />

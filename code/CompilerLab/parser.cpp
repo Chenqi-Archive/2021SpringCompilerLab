@@ -18,7 +18,8 @@ void Parser::ExpParser::ReadOperator(OperatorType op) {
 	} else {
 		if(!IsBinaryOperator(op)) { throw compile_error("expected a binary operator"); }
 		while (!binary_op_stack.empty()) {
-			if (GetBinaryOperatorPriority(op) < GetBinaryOperatorPriority(binary_op_stack.top()) || op == OperatorType::Assign) {
+			if (GetBinaryOperatorPriority(op) < GetBinaryOperatorPriority(binary_op_stack.top()) || 
+				op == OperatorType::Assign && binary_op_stack.top() == OperatorType::Assign) {  // right-associative
 				break;
 			} else {
 				ApplyTopBinaryOp();

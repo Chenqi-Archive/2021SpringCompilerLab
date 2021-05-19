@@ -5,11 +5,13 @@
 #include <vector>
 #include <string>
 #include <unordered_map>
+#include <list>
 
 
 using std::vector;
 using std::string_view;
 using std::unordered_map;
+using std::list;
 
 
 using InitializingList = vector<std::pair<uint, int>>;
@@ -20,9 +22,9 @@ public:
 	const vector<uint> dimension;
 	const uint length;
 public:
-	ArraySize(vector<uint>&& dimension) : dimension(std::move(dimension)), length(CalculateArrayLength(dimension)) {}
+	ArraySize(vector<uint>&& dimension) : dimension(std::move(dimension)), length(CalculateArrayLength()) {}
 private:
-	static uint CalculateArrayLength(const vector<uint>& array_size);
+	uint CalculateArrayLength();
 };
 
 
@@ -57,16 +59,22 @@ private:
 
 
 using VarSymbolTable = unordered_map<string_view, VarEntry>;
-using VarSymbolTableStack = vector<VarSymbolTable>;
+using VarSymbolTableStack = list<VarSymbolTable>;
 using LocalVarIndexStack = vector<uint>;
 
 
-using ParameterTypeList = vector<ref_ptr<const ArraySize>>;
+using ParameterArraySize = ArrayIndex;
+using ParameterTypeList = vector<ParameterArraySize>;
 
 struct FuncEntry {
+public:
 	const uint index;
 	const bool is_int;
 	const ParameterTypeList parameter_type_list;
+public:
+	FuncEntry(uint index, bool is_int, ParameterTypeList&& parameter_type_list) :
+		index(index), is_int(is_int), parameter_type_list(std::move(parameter_type_list)) {
+	}
 };
 
 

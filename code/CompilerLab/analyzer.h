@@ -11,7 +11,7 @@ private:
 	LocalVarIndexStack var_index_stack;
 	FuncSymbolTable func_symbol_table;
 private:
-	uint AllocateVarIndex(uint length) { return var_index_stack.back() += length; }
+	uint AllocateVarIndex(uint length) { uint index = var_index_stack.back(); var_index_stack.back() += length; return index; }
 	uint AllocateFuncIndex() { return func_symbol_table.size(); }
 private:
 	const VarEntry& AddVar(string_view identifier, const ArraySize& array_size, bool is_global);
@@ -44,10 +44,6 @@ private:
 	InitializingList GetInitializingList(const ArraySize& array_size, const InitializerList& initializer_list);
 
 private:
-	void AddParameterList(const ParameterList& parameter_list);
-	ParameterTypeList GetParameterTypeList();
-
-private:
 	CodeBlock current_func_code_block;
 	bool is_return_type_int = false;
 	uint max_local_var_size = 0;
@@ -56,9 +52,10 @@ private:
 	uint label_continue = -1;
 
 private:
-	VarInfo AllocateTempVar() { return VarInfo(VarType::Local, AllocateVarIndex(1)); }
+	VarInfo AllocateTempVar() { return VarInfo::LocalTemp(AllocateVarIndex(1)); }
 	uint AllocateLabel() { return current_label_count++; }
 	void AppendCodeLine(CodeLine code_line) { current_func_code_block.push_back(code_line); }
+	VarInfo AllocateTempVarInitializedWith(int value);
 
 private:
 	VarInfo ReadArraySubscript(const ArraySize& array_size, const ArraySubscript& subscript);
@@ -67,6 +64,7 @@ private:
 	VarInfo ReadUnaryOp(const ExpNode_UnaryOp& exp_node_unary_op);
 	VarInfo ReadBinaryOp(const ExpNode_BinaryOp& exp_node_binary_op);
 	VarInfo ReadExpTree(const ExpTree& exp_tree);
+	VarInfo ReadExpTreeAsInt(const ExpTree& exp_tree);
 
 private:
 	void ReadLocalVarDef(const AstNode_VarDef& node_var_def);
@@ -79,6 +77,10 @@ private:
 	void ReadReturn(const AstNode_Return& node_return);
 	void ReadLocalBlock(const Block& block);
 
+private:
+	void AddParameterList(const ParameterList& parameter_list);
+	void RemoveParameterList();
+	ParameterTypeList GetParameterTypeList();
 private:
 	std::pair<uint, InitializingList> ReadGlobalVarDef(const AstNode_VarDef& var_def);
 	GlobalFuncDef ReadGlobalFuncDef(const AstNode_FuncDef& func_def);
