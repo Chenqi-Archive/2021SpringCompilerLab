@@ -26,21 +26,21 @@ public:
 	const int var[3];
 
 private:
-	CodeLine(OperatorType op, VarInfo dest, VarInfo src1, VarInfo src2) :
+	CodeLine(OperatorType op, const VarInfo& dest, const VarInfo& src1, const VarInfo& src2) :
 		type(CodeLineType::BinaryOp), op(op),
 		var_type{ dest.type, src1.type, src2.type }, var{ dest.value, src1.value, src2.value }{}
-	CodeLine(OperatorType op, VarInfo dest, VarInfo src) :
+	CodeLine(OperatorType op, const VarInfo& dest, const VarInfo& src) :
 		type(CodeLineType::UnaryOp), op(op),
 		var_type{ dest.type, src.type, VarType::Void }, var{ dest.value, src.value, 0 }{}
-	CodeLine(VarInfo dest, VarInfo src_begin, VarInfo src_offset) : 
+	CodeLine(const VarInfo& dest, const VarInfo& src_begin, const VarInfo& src_offset) : 
 		type(CodeLineType::Load), op(OperatorType::None), 
 		var_type{ dest.type, src_begin.type, src_offset.type }, var{ dest.value, src_begin.value, src_offset.value }{}
-	CodeLine(bool store_tag, VarInfo dest_begin, VarInfo dest_offset, VarInfo src) :
+	CodeLine(bool store_tag, const VarInfo& dest_begin, const VarInfo& dest_offset, const VarInfo& src) :
 		type(CodeLineType::Store), op(OperatorType::None),
 		var_type{ dest_begin.type, dest_offset.type, src.type }, var{ dest_begin.value, dest_offset.value, src.value }{}
-	CodeLine(VarInfo para) :
+	CodeLine(const VarInfo& para) :
 		type(CodeLineType::Parameter), op(OperatorType::None), var_type{ para.type }, var{ para.value }{}
-	CodeLine(uint func_index, VarInfo dest) :
+	CodeLine(uint func_index, const VarInfo& dest) :
 		type(CodeLineType::FuncCall), op(OperatorType::None),
 		var_type{ VarType::Void, dest.type }, var{ (int)func_index, dest.value } {}
 	CodeLine(uint func_index) :
@@ -49,7 +49,7 @@ private:
 	CodeLine(bool label_tag, uint label_index) :
 		type(CodeLineType::Label), op(OperatorType::None),
 		var_type{ VarType::Void }, var{ (int)label_index } {}
-	CodeLine(uint label_index, OperatorType op, VarInfo src1, VarInfo src2) :
+	CodeLine(uint label_index, OperatorType op, const VarInfo& src1, const VarInfo& src2) :
 		type(CodeLineType::JumpIf), op(op),
 		var_type{ VarType::Void, src1.type, src2.type }, var{ (int)label_index, src1.value, src2.value }{
 		assert(op >= OperatorType::Equal && op <= OperatorType::GreaterEuqal); }
@@ -58,32 +58,32 @@ private:
 		var_type{ VarType::Void }, var{ (int)label_index } {}
 	CodeLine() : 
 		type(CodeLineType::Return), op(OperatorType::None), var_type{}, var{} {}
-	CodeLine(bool return_tag, VarInfo var):
+	CodeLine(bool return_tag, const VarInfo& var):
 		type(CodeLineType::Return), op(OperatorType::None), var_type{ var.type }, var{ var.value }{}
 
 public:
-	static CodeLine BinaryOperation(OperatorType op, VarInfo dest, VarInfo src1, VarInfo src2) {
+	static CodeLine BinaryOperation(OperatorType op, const VarInfo& dest, const VarInfo& src1, const VarInfo& src2) {
 		assert(IsBinaryOperator(op));
 		return CodeLine(op, dest, src1, src2);
 	}
-	static CodeLine UnaryOperation(OperatorType op, VarInfo dest, VarInfo src) {
+	static CodeLine UnaryOperation(OperatorType op, const VarInfo& dest, const VarInfo& src) {
 		assert(IsUnaryOperator(op)); 
 		return CodeLine(op, dest, src);
 	}
-	static CodeLine Load(VarInfo dest, VarInfo src_begin, VarInfo src_offset) {
+	static CodeLine Load(const VarInfo& dest, const VarInfo& src_begin, const VarInfo& src_offset) {
 		return CodeLine(dest, src_begin, src_offset);
 	}
-	static CodeLine Store(VarInfo dest_begin, VarInfo dest_offset, VarInfo src) {
+	static CodeLine Store(const VarInfo& dest_begin, const VarInfo& dest_offset, const VarInfo& src) {
 		return CodeLine(true, dest_begin, dest_offset, src);
 	}
-	static CodeLine Assign(VarInfo dest, VarInfo src) {
+	static CodeLine Assign(const VarInfo& dest, const VarInfo& src) {
 		// or use UnaryOperation(OperatorType::Add, dest, src);
 		return Store(dest, VarInfo::Number(0), src);
 	}
-	static CodeLine Parameter(VarInfo para) {
+	static CodeLine Parameter(const VarInfo& para) {
 		return CodeLine(para);
 	}
-	static CodeLine IntFuncCall(uint func_index, VarInfo dest) {
+	static CodeLine IntFuncCall(uint func_index, const VarInfo& dest) {
 		return CodeLine(func_index, dest);
 	}
 	static CodeLine VoidFuncCall(uint func_index) {
@@ -92,13 +92,13 @@ public:
 	static CodeLine Label(uint label_index) {
 		return CodeLine(true, label_index);
 	}
-	static CodeLine JumpIf(uint label_index, OperatorType op, VarInfo src1, VarInfo src2) {
+	static CodeLine JumpIf(uint label_index, OperatorType op, const VarInfo& src1, const VarInfo& src2) {
 		return CodeLine(label_index, op, src1, src2);
 	}
-	static CodeLine JumpIf(uint label_index, VarInfo src) {
+	static CodeLine JumpIf(uint label_index, const VarInfo& src) {
 		return JumpIf(label_index, OperatorType::NotEqual, src, VarInfo::Number(0));
 	}
-	static CodeLine JumpIfNot(uint label_index, VarInfo src) {
+	static CodeLine JumpIfNot(uint label_index, const VarInfo& src) {
 		return JumpIf(label_index, OperatorType::Equal, src, VarInfo::Number(0));
 	}
 	static CodeLine Goto(uint label_index) {
@@ -107,7 +107,7 @@ public:
 	static CodeLine ReturnVoid() {
 		return CodeLine();
 	}
-	static CodeLine ReturnInt(VarInfo var) {
+	static CodeLine ReturnInt(const VarInfo& var) {
 		return CodeLine(true, var);
 	}
 };

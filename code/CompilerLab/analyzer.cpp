@@ -1,6 +1,8 @@
 #include "analyzer.h"
 #include "reversion_wrapper.h"
 
+#include <optional>
+
 
 const VarEntry& Analyzer::AddVar(string_view identifier, const ArraySize& array_size, bool is_global) {
 	auto [it, success] = var_symbol_table_stack.back().insert(std::make_pair(identifier, VarEntry(array_size, AllocateVarIndex(array_size.length), is_global)));
@@ -181,28 +183,40 @@ InitializingList Analyzer::GetInitializingList(const ArraySize& array_size, cons
 	return EvalExpTreeInitializingList(GetExpTreeInitializingList(array_size, initializer_list));
 }
 
-inline VarInfo Analyzer::AllocateTempVarInitializedWith(int value) {
-	VarInfo var_temp = AllocateTempVar();
+VarInfo Analyzer::AllocateTempVarInitializedWith(int value, vector<uint> dimension) {
+	VarInfo var_temp = AllocateTempVar(std::move(dimension));
 	AppendCodeLine(CodeLine::Assign(var_temp, VarInfo::Number(value)));
 	return var_temp;
 }
 
 VarInfo Analyzer::ReadArraySubscript(const ArraySize& array_size, const ArraySubscript& subscript) {
 	if (subscript.size() > array_size.dimension.size()) { throw compile_error("expression must have a value type"); }
+	vector<uint> var_ref_dimension(array_size.dimension.begin() + subscript.size(), array_size.dimension.end());
 	uint current_size = array_size.length;
-	VarInfo var_current_offset = AllocateTempVarInitializedWith(0);
+	int current_number = 0;
+	std::optional<VarInfo> var_mul_temp;
+	std::optional<VarInfo> var_current_offset;
 	for (uint i = 0; i < subscript.size(); ++i) {
 		assert(current_size % array_size.dimension[i] == 0);
 		current_size = current_size / array_size.dimension[i];
 		VarInfo var_index = ReadExpTreeAsInt(subscript[i]);
 		if (var_index.IsNumber()) {
-			AppendCodeLine(CodeLine::BinaryOperation(OperatorType::Add, var_current_offset, var_current_offset, VarInfo::Number(var_index.value * current_size)));
+			current_number += var_index.value * current_size;
 		} else {
-			AppendCodeLine(CodeLine::BinaryOperation(OperatorType::Mul, var_index, var_index, VarInfo::Number(current_size)));
-			AppendCodeLine(CodeLine::BinaryOperation(OperatorType::Add, var_current_offset, var_current_offset, var_index));
+			if (!var_mul_temp.has_value()) {
+				var_mul_temp.emplace(AllocateTempVar());
+				var_current_offset.emplace(AllocateTempVarInitializedWith(0, std::move(var_ref_dimension)));
+			}
+			AppendCodeLine(CodeLine::BinaryOperation(OperatorType::Mul, var_mul_temp.value(), var_index, VarInfo::Number(current_size)));
+			AppendCodeLine(CodeLine::BinaryOperation(OperatorType::Add, var_current_offset.value(), var_current_offset.value(), var_mul_temp.value()));
 		}
 	}
-	return var_current_offset;
+	if (!var_mul_temp.has_value()) {
+		return AllocateTempVarInitializedWith(current_number, std::move(var_ref_dimension));
+	} else {
+		AppendCodeLine(CodeLine::BinaryOperation(OperatorType::Add, var_current_offset.value(), var_current_offset.value(), VarInfo::Number(current_number)));
+		return var_current_offset.value();
+	}
 }
 
 VarInfo Analyzer::ReadVarRef(const ExpNode_Var& exp_node_var) {
@@ -215,8 +229,7 @@ VarInfo Analyzer::ReadVarRef(const ExpNode_Var& exp_node_var) {
 		} else {
 			VarInfo var_offset = ReadArraySubscript(var_entry.GetArraySize(), exp_node_var.array_subscript);
 			AppendCodeLine(CodeLine::Load(var_offset, VarInfo::Select(var_entry.is_global, {}, var_entry.index), var_offset));
-			static auto sub_vec = [](const vector<uint>& vec, uint begin) { return vector<uint>(vec.begin() + begin, vec.end()); };
-			return VarInfo::Select(var_entry.is_global, sub_vec(var_entry.GetArraySize().dimension, exp_node_var.array_subscript.size()), var_offset.value);
+			return var_offset;
 		}
 	}
 }
@@ -273,7 +286,7 @@ VarInfo Analyzer::ReadBinaryOp(const ExpNode_BinaryOp& exp_node_binary_op) {
 		VarInfo var_temp = AllocateTempVarInitializedWith(0);
 		AppendCodeLine(CodeLine::JumpIfNot(label_next, var_info_left));
 		VarInfo var_info_right = ReadExpTreeAsInt(exp_node_binary_op.right);
-		AppendCodeLine(CodeLine::BinaryOperation(exp_node_binary_op.op, var_temp, var_info_left, var_info_right));
+		AppendCodeLine(CodeLine::Assign(var_temp, var_info_right));
 		AppendCodeLine(CodeLine::Label(label_next));
 		return var_temp;
 	} else if (exp_node_binary_op.op == OperatorType::Or) {
@@ -284,7 +297,7 @@ VarInfo Analyzer::ReadBinaryOp(const ExpNode_BinaryOp& exp_node_binary_op) {
 		VarInfo var_temp = AllocateTempVarInitializedWith(1);
 		AppendCodeLine(CodeLine::JumpIf(label_next, var_info_left));
 		VarInfo var_info_right = ReadExpTreeAsInt(exp_node_binary_op.right);
-		AppendCodeLine(CodeLine::BinaryOperation(exp_node_binary_op.op, var_temp, var_info_left, var_info_right));
+		AppendCodeLine(CodeLine::Assign(var_temp, var_info_right));
 		AppendCodeLine(CodeLine::Label(label_next));
 		return var_temp;
 	} else {

@@ -10,6 +10,7 @@ enum class VarType : uchar {
 	Void,
 	Number,
 	LocalTemp,
+#error VarRef
 	Local,
 	Global
 };
@@ -27,7 +28,7 @@ private:
 public:
 	static VarInfo Void() { return VarInfo(VarType::Void, {}, {}); }
 	static VarInfo Number(int value) { return VarInfo(VarType::Number, {}, value); }
-	static VarInfo LocalTemp(uint index) { return VarInfo(VarType::LocalTemp, {}, (int)index); }
+	static VarInfo LocalTemp(vector<uint> dimension, uint index) { return VarInfo(VarType::LocalTemp, dimension, (int)index); }
 	static VarInfo Local(vector<uint> dimension, uint index) { return VarInfo(VarType::Local, dimension, (int)index); }
 	static VarInfo Global(vector<uint> dimension, uint index) { return VarInfo(VarType::Global, dimension, (int)index); }
 	static VarInfo Select(bool is_global, vector<uint> dimension, uint index) {
@@ -37,7 +38,7 @@ public:
 	bool IsNumber() const { return type == VarType::Number; }
 	bool IsInt() const { return type != VarType::Void && dimension.empty(); }
 	bool IsLValue() const { return (type == VarType::Local || type == VarType::Global) && dimension.empty(); }
-	bool IsArrayTypeSame(const vector<uint> para) const { return type != VarType::Void && dimension == para; }
+	bool IsArrayTypeSame(const vector<uint>& para) const { return type != VarType::Void && dimension == para; }
 private:
 	vector<uint> NormalizeArrayDimension(vector<uint> dimension) {
 		if (!dimension.empty()) { dimension[0] = 1; }

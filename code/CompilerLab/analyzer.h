@@ -52,10 +52,10 @@ private:
 	uint label_continue = -1;
 
 private:
-	VarInfo AllocateTempVar() { return VarInfo::LocalTemp(AllocateVarIndex(1)); }
+	VarInfo AllocateTempVar(vector<uint> dimension = {}) { return VarInfo::LocalTemp(dimension, AllocateVarIndex(1)); }
 	uint AllocateLabel() { return current_label_count++; }
 	void AppendCodeLine(CodeLine code_line) { current_func_code_block.push_back(code_line); }
-	VarInfo AllocateTempVarInitializedWith(int value);
+	VarInfo AllocateTempVarInitializedWith(int value, vector<uint> dimension = {});
 
 private:
 	VarInfo ReadArraySubscript(const ArraySize& array_size, const ArraySubscript& subscript);
