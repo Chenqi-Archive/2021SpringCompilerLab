@@ -52,10 +52,10 @@ private:
 	uint label_continue = -1;
 
 private:
-	VarInfo AllocateTempVar(vector<uint> dimension = {}) { return VarInfo::LocalTemp(dimension, AllocateVarIndex(1)); }
+	VarInfo AllocateTempVar() { return VarInfo::Temp(AllocateVarIndex(1)); }
 	uint AllocateLabel() { return current_label_count++; }
 	void AppendCodeLine(CodeLine code_line) { current_func_code_block.push_back(code_line); }
-	VarInfo AllocateTempVarInitializedWith(int value, vector<uint> dimension = {});
+	VarInfo AllocateTempVarInitializedWith(int value);
 
 private:
 	VarInfo ReadArraySubscript(const ArraySize& array_size, const ArraySubscript& subscript);
@@ -64,7 +64,7 @@ private:
 	VarInfo ReadUnaryOp(const ExpNode_UnaryOp& exp_node_unary_op);
 	VarInfo ReadBinaryOp(const ExpNode_BinaryOp& exp_node_binary_op);
 	VarInfo ReadExpTree(const ExpTree& exp_tree);
-	VarInfo ReadExpTreeAsInt(const ExpTree& exp_tree);
+	VarInfo ReadExpTreeAsIntOrIntRef(const ExpTree& exp_tree);
 
 private:
 	void ReadLocalVarDef(const AstNode_VarDef& node_var_def);

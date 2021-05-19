@@ -18,56 +18,95 @@ enum class CodeLineType : uchar {
 };
 
 
+struct CodeLineVarType {
+public:
+	const enum class Type : uchar { Empty, Number, Local, Global } type;
+	operator Type() const { return type; }
+public:
+	CodeLineVarType() : type(Type::Empty) {}
+	CodeLineVarType(const VarInfo& var_info) : type(ConvertVarType(var_info)) {}
+public:
+	bool IsIntOrRef() const { return type != Type::Empty; }
+	bool IsRef() const { return type == Type::Local || type == Type::Global; }
+private:
+	Type ConvertVarType(const VarInfo& var_info) {
+		switch (var_info.type) 	{
+		case VarType::Int: return var_info.is_number ? Type::Number : Type::Local;
+		case VarType::IntRef:
+		case VarType::Array: return var_info.is_global ? Type::Global : Type::Local;
+		default: assert(false); return Type::Empty;
+		}
+	}
+};
+
+
 struct CodeLine {
 public:
 	const CodeLineType type : 4;
 	const OperatorType op : 4;
-	const VarType var_type[3];
+	const CodeLineVarType var_type[3];
 	const int var[3];
 
 private:
 	CodeLine(OperatorType op, const VarInfo& dest, const VarInfo& src1, const VarInfo& src2) :
 		type(CodeLineType::BinaryOp), op(op),
-		var_type{ dest.type, src1.type, src2.type }, var{ dest.value, src1.value, src2.value }{}
+		var_type{ dest, src1, src2 }, var{ dest.value, src1.value, src2.value }{ 
+		assert(IsBinaryOperator(op)); assert(var_type[0].IsRef() && var_type[1].IsIntOrRef() && var_type[2].IsIntOrRef());
+	}
 	CodeLine(OperatorType op, const VarInfo& dest, const VarInfo& src) :
 		type(CodeLineType::UnaryOp), op(op),
-		var_type{ dest.type, src.type, VarType::Void }, var{ dest.value, src.value, 0 }{}
+		var_type{ dest, src }, var{ dest.value, src.value, 0 }{
+		assert(IsUnaryOperator(op)); assert(var_type[0].IsRef() && var_type[1].IsIntOrRef());
+	}
 	CodeLine(const VarInfo& dest, const VarInfo& src_begin, const VarInfo& src_offset) : 
 		type(CodeLineType::Load), op(OperatorType::None), 
-		var_type{ dest.type, src_begin.type, src_offset.type }, var{ dest.value, src_begin.value, src_offset.value }{}
+		var_type{ dest, src_begin, src_offset }, var{ dest.value, src_begin.value, src_offset.value }{
+		assert(var_type[0].IsRef() && var_type[1].IsRef() && var_type[2].IsIntOrRef());
+	}
 	CodeLine(bool store_tag, const VarInfo& dest_begin, const VarInfo& dest_offset, const VarInfo& src) :
 		type(CodeLineType::Store), op(OperatorType::None),
-		var_type{ dest_begin.type, dest_offset.type, src.type }, var{ dest_begin.value, dest_offset.value, src.value }{}
+		var_type{ dest_begin, dest_offset, src }, var{ dest_begin.value, dest_offset.value, src.value }{
+		assert(var_type[0].IsRef() && var_type[1].IsIntOrRef() && var_type[2].IsIntOrRef());
+	}
 	CodeLine(const VarInfo& para) :
-		type(CodeLineType::Parameter), op(OperatorType::None), var_type{ para.type }, var{ para.value }{}
+		type(CodeLineType::Parameter), op(OperatorType::None), var_type{ para }, var{ para.value }{
+		assert(var_type[0].IsIntOrRef());
+	}
 	CodeLine(uint func_index, const VarInfo& dest) :
 		type(CodeLineType::FuncCall), op(OperatorType::None),
-		var_type{ VarType::Void, dest.type }, var{ (int)func_index, dest.value } {}
+		var_type{ {}, dest }, var{ (int)func_index, dest.value } {
+		assert(var_type[1].IsRef());
+	}
 	CodeLine(uint func_index) :
 		type(CodeLineType::FuncCall), op(OperatorType::None),
-		var_type{ VarType::Void }, var{ (int)func_index } {}
+		var_type{}, var{ (int)func_index } {
+	}
 	CodeLine(bool label_tag, uint label_index) :
 		type(CodeLineType::Label), op(OperatorType::None),
-		var_type{ VarType::Void }, var{ (int)label_index } {}
+		var_type{}, var{ (int)label_index } {
+	}
 	CodeLine(uint label_index, OperatorType op, const VarInfo& src1, const VarInfo& src2) :
 		type(CodeLineType::JumpIf), op(op),
-		var_type{ VarType::Void, src1.type, src2.type }, var{ (int)label_index, src1.value, src2.value }{
-		assert(op >= OperatorType::Equal && op <= OperatorType::GreaterEuqal); }
+		var_type{ {}, src1, src2 }, var{ (int)label_index, src1.value, src2.value }{
+		assert(op >= OperatorType::Equal && op <= OperatorType::GreaterEuqal);
+		assert(var_type[1].IsIntOrRef() && var_type[2].IsIntOrRef());
+	}
 	CodeLine(bool goto_tag, bool goto_tag2, uint label_index) :
 		type(CodeLineType::Goto), op(OperatorType::None),
-		var_type{ VarType::Void }, var{ (int)label_index } {}
+		var_type{}, var{ (int)label_index } {}
 	CodeLine() : 
-		type(CodeLineType::Return), op(OperatorType::None), var_type{}, var{} {}
+		type(CodeLineType::Return), op(OperatorType::None), var_type{}, var{} {
+	}
 	CodeLine(bool return_tag, const VarInfo& var):
-		type(CodeLineType::Return), op(OperatorType::None), var_type{ var.type }, var{ var.value }{}
+		type(CodeLineType::Return), op(OperatorType::None), var_type{ var }, var{ var.value }{
+		assert(var_type[0].IsIntOrRef());
+	}
 
 public:
 	static CodeLine BinaryOperation(OperatorType op, const VarInfo& dest, const VarInfo& src1, const VarInfo& src2) {
-		assert(IsBinaryOperator(op));
 		return CodeLine(op, dest, src1, src2);
 	}
 	static CodeLine UnaryOperation(OperatorType op, const VarInfo& dest, const VarInfo& src) {
-		assert(IsUnaryOperator(op)); 
 		return CodeLine(op, dest, src);
 	}
 	static CodeLine Load(const VarInfo& dest, const VarInfo& src_begin, const VarInfo& src_offset) {

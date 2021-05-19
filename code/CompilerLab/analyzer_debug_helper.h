@@ -10,12 +10,11 @@ using std::cout;
 using std::endl;
 
 
-static std::ostream& operator<<(std::ostream& os, std::pair<VarType, int> var_info) {
+static std::ostream& operator<<(std::ostream& os, std::pair<CodeLineVarType, int> var_info) {
 	switch (var_info.first) {
-	case VarType::Number: return os << var_info.second;
-	case VarType::LocalTemp: return os << "t" << var_info.second;
-	case VarType::Local: return os << "a" << var_info.second;
-	case VarType::Global: return os << "g" << var_info.second;
+	case CodeLineVarType::Type::Number: return os << var_info.second;
+	case CodeLineVarType::Type::Local: return os << "t" << var_info.second;
+	case CodeLineVarType::Type::Global: return os << "g" << var_info.second;
 	default: assert(false); return os;
 	}
 }
@@ -23,7 +22,7 @@ static std::ostream& operator<<(std::ostream& os, std::pair<VarType, int> var_in
 
 class CodeLinePrinter {
 private:
-	static std::pair<VarType, int> VarInfo(const CodeLine& line, int index) {
+	static std::pair<CodeLineVarType, int> VarInfo(const CodeLine& line, int index) {
 		assert(index >= 0 && index < 3);
 		return { line.var_type[index],  line.var[index] };
 	}
@@ -46,7 +45,7 @@ public:
 			cout << "\tparam " << VarInfo(line, 0) << endl;
 			break;
 		case CodeLineType::FuncCall:
-			line.var_type[1] == VarType::Void ? cout << "\t" : cout << "\t" << VarInfo(line, 1) << " = ";
+			line.var_type[1] == CodeLineVarType::Type::Empty ? cout << "\t" : cout << "\t" << VarInfo(line, 1) << " = ";
 			if (IsLibraryFunc(line.var[0])) {
 				cout << "call " << GetLibraryFuncString(line.var[0]) << endl;
 			} else {
@@ -64,7 +63,7 @@ public:
 			break;
 		case CodeLineType::Return:
 			cout << "\treturn"; 
-			line.var_type[0] == VarType::Void ? cout << endl : cout << " " << VarInfo(line, 0) << endl;
+			line.var_type[0] == CodeLineVarType::Type::Empty ? cout << endl : cout << " " << VarInfo(line, 0) << endl;
 			break;
 		default:
 			assert(false);
