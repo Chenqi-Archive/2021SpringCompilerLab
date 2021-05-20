@@ -1,7 +1,7 @@
 #pragma once
 
 #include "linear_code.h"
-#include "symbol_table.h"
+#include "library_function.h"
 
 #include <iostream>
 

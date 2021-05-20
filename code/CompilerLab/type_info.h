@@ -36,7 +36,7 @@ public:
 	bool IsNumber() const { return is_number; }
 	bool IsRValue() const { return type == VarType::Int || type == VarType::IntRef; }
 	bool IsLValue() const { return type == VarType::IntRef; }
-	bool IsArrayTypeSame(const vector<uint>& para) const { assert(type == VarType::Array); return array_dimension == para; }
+	bool IsArrayTypeSame(const vector<uint>& para) const { return type != VarType::Void && array_dimension == para; }
 private:
 	vector<uint> NormalizeArrayDimension(vector<uint> dimension) {
 		if (!dimension.empty()) { dimension[0] = 1; }

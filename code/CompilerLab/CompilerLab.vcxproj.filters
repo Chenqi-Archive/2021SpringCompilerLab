@@ -60,6 +60,12 @@
     <ClInclude Include="type_info.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="linear_code_interpreter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="library_function.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">

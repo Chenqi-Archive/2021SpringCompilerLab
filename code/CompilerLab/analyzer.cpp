@@ -8,6 +8,12 @@ const VarEntry& Analyzer::AddVar(string_view identifier, const ArraySize& array_
 	return it->second;
 }
 
+void Analyzer::AddParameter(string_view identifier, const ArraySize& array_size) {
+#error array as parameter or local variable?
+	auto [it, success] = var_symbol_table_stack.back().insert(std::make_pair(identifier, VarEntry(array_size, AllocateVarIndex(1), false)));
+	assert(success == true);
+}
+
 void Analyzer::AddConstVar(string_view identifier, const ArraySize& array_size, const InitializingList& initializing_list) {
 	auto [it, success] = var_symbol_table_stack.back().insert(std::make_pair(identifier, VarEntry(array_size, initializing_list)));
 	if (!success) { throw compile_error("variable redefinition"); }
@@ -90,6 +96,7 @@ ArraySize Analyzer::EvalParameterArraySize(const ArrayDimension& array_dimension
 	if (array_dimension.empty()) { return ArraySize(vector<uint>()); }
 	vector<uint> dimension; dimension.reserve(array_dimension.size()); dimension.push_back(1);
 	for (auto it = array_dimension.begin() + 1; it != array_dimension.end(); ++it) {
+		if (*it == nullptr) { throw compile_error("the array size except for the first dimension of a parameter must be specified"); }
 		int size = EvalConstExp(*it);
 		if (size <= 0) { throw compile_error("the size of an array must be greater than zero"); }
 		dimension.push_back((uint)size);
@@ -190,7 +197,6 @@ VarInfo Analyzer::AllocateTempVarInitializedWith(int value) {
 VarInfo Analyzer::ReadArraySubscript(const ArraySize& array_size, const ArraySubscript& subscript) {
 	const vector<uint>& array_dimension = array_size.dimension;
 	if (subscript.size() > array_dimension.size()) { throw compile_error("expression must have a value type"); }
-	VarInfo var_current_offset = VarInfo::Var(false, vector<uint>(array_dimension.begin() + subscript.size(), array_dimension.end()), AllocateVarIndex(1));
 	vector<std::pair<uint, VarInfo>> index; index.reserve(subscript.size());
 	uint current_size = array_size.length; int current_number = 0;
 	for (uint i = 0; i < subscript.size(); ++i) {
@@ -203,6 +209,7 @@ VarInfo Analyzer::ReadArraySubscript(const ArraySize& array_size, const ArraySub
 			index.push_back(std::make_pair(current_size, var_index));
 		}
 	}
+	VarInfo var_current_offset = VarInfo::Var(false, vector<uint>(array_dimension.begin() + subscript.size(), array_dimension.end()), AllocateVarIndex(1));
 	AppendCodeLine(CodeLine::Assign(var_current_offset, VarInfo::Number(current_number)));
 	if (!index.empty()) {
 		VarInfo var_mul_temp = AllocateTempVar();
@@ -219,9 +226,13 @@ VarInfo Analyzer::ReadVarRef(const ExpNode_Var& exp_node_var) {
 	if (var_entry.IsConst()) {
 		return VarInfo::Number(var_entry.ReadAtIndex(EvalArrayIndex(exp_node_var.array_subscript)));
 	} else {
-		VarInfo var_offset = ReadArraySubscript(var_entry.GetArraySize(), exp_node_var.array_subscript);
-		AppendCodeLine(CodeLine::Load(var_offset, VarInfo::Var(var_entry.is_global, {}, var_entry.index), var_offset));
-		return var_offset;
+		if (exp_node_var.array_subscript.size() == 0) {
+			return VarInfo::Var(var_entry.is_global, var_entry.GetArraySize().dimension, var_entry.index);
+		} else {
+			VarInfo var_offset = ReadArraySubscript(var_entry.GetArraySize(), exp_node_var.array_subscript);
+			AppendCodeLine(CodeLine::Load(var_offset, VarInfo::Var(var_entry.is_global, {}, var_entry.index), var_offset));
+			return var_offset;
+		}
 	}
 }
 
@@ -475,6 +486,13 @@ GlobalFuncDef Analyzer::ReadGlobalFuncDef(const AstNode_FuncDef& func_def) {
 	return GlobalFuncDef{ func_def.parameter_list.size(), max_local_var_size, func_def.is_int, std::move(current_func_code_block) };
 }
 
+uint Analyzer::GetMainFuncIndex() {
+	auto main_func_entry = FindFunc("main");
+	if (!main_func_entry.parameter_type_list.empty()) { throw compile_error("main function must have no parameter"); }
+	if (!main_func_entry.is_int) { throw compile_error("main function must return int"); }
+	return main_func_entry.index;
+}
+
 LinearCode Analyzer::ReadGlobalBlock(const Block& block) {
 	assert(var_symbol_table_stack.empty());
 	assert(var_index_stack.empty());
@@ -500,7 +518,7 @@ LinearCode Analyzer::ReadGlobalBlock(const Block& block) {
 	}
 	assert(var_index_stack.size() == 1);
 	linear_code.global_var_table.length = var_index_stack.back();
-	linear_code.main_func_index = FindFunc("main").index;
+	linear_code.main_func_index = GetMainFuncIndex();
 	var_symbol_table_stack.clear();
 	var_index_stack.clear();
 	func_symbol_table = FuncSymbolTable();

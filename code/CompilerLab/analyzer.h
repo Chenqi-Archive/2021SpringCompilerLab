@@ -15,6 +15,7 @@ private:
 	uint AllocateFuncIndex() { return func_symbol_table.size(); }
 private:
 	const VarEntry& AddVar(string_view identifier, const ArraySize& array_size, bool is_global);
+	void AddParameter(string_view identifier, const ArraySize& array_size);
 	void AddConstVar(string_view identifier, const ArraySize& array_size, const InitializingList& initializing_list);
 	void AddGlobalFunc(string_view identifier, bool is_int, ParameterTypeList&& parameter_type_list);
 private:
@@ -84,6 +85,7 @@ private:
 private:
 	std::pair<uint, InitializingList> ReadGlobalVarDef(const AstNode_VarDef& var_def);
 	GlobalFuncDef ReadGlobalFuncDef(const AstNode_FuncDef& func_def);
+	uint GetMainFuncIndex();
 	LinearCode ReadGlobalBlock(const Block& block);
 public:
 	LinearCode ReadSyntaxTree(const SyntaxTree& syntax_tree) { return ReadGlobalBlock(syntax_tree); }
