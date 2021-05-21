@@ -36,9 +36,10 @@ struct VarEntry : private ArraySize {
 public:
 	const uint index;
 	const bool is_global;
+	const bool is_pointer;
 public:
-	VarEntry(const ArraySize& array_size, uint index, bool is_global) :
-		ArraySize(array_size), index(index), is_global(is_global) {
+	VarEntry(const ArraySize& array_size, uint index, bool is_global, bool is_pointer) :
+		ArraySize(array_size), index(index), is_global(is_global), is_pointer(is_pointer) {
 	}
 public:
 	bool IsArray() const { return !dimension.empty(); }
@@ -49,7 +50,7 @@ public:
 	static constexpr uint max_constexpr_array_length = 65536;
 	const vector<int> content;
 	VarEntry(const ArraySize& array_size, const InitializingList& initializing_list) :
-		ArraySize(array_size), index(-1), is_global(false),
+		ArraySize(array_size), index(-1), is_global(false), is_pointer(false),
 		content(GetInitialContent(length, initializing_list)) {
 	}
 	bool IsConst() const { return !content.empty(); }

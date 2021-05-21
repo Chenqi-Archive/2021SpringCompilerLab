@@ -14,8 +14,7 @@ private:
 	uint AllocateVarIndex(uint length) { uint index = var_index_stack.back(); var_index_stack.back() += length; return index; }
 	uint AllocateFuncIndex() { return func_symbol_table.size(); }
 private:
-	const VarEntry& AddVar(string_view identifier, const ArraySize& array_size, bool is_global);
-	void AddParameter(string_view identifier, const ArraySize& array_size);
+	const VarEntry& AddVar(string_view identifier, const ArraySize& array_size, bool is_global, bool is_parameter);
 	void AddConstVar(string_view identifier, const ArraySize& array_size, const InitializingList& initializing_list);
 	void AddGlobalFunc(string_view identifier, bool is_int, ParameterTypeList&& parameter_type_list);
 private:
@@ -52,6 +51,9 @@ private:
 	uint label_break = -1;
 	uint label_continue = -1;
 
+	bool is_assignment = false;
+	uint current_var_addr_index = -1;
+
 private:
 	VarInfo AllocateTempVar() { return VarInfo::Temp(AllocateVarIndex(1)); }
 	uint AllocateLabel() { return current_label_count++; }
@@ -59,7 +61,7 @@ private:
 	VarInfo AllocateTempVarInitializedWith(int value);
 
 private:
-	VarInfo ReadArraySubscript(const ArraySize& array_size, const ArraySubscript& subscript);
+	VarInfo ReadArraySubscript(const VarEntry& var_entry, const ArraySubscript& subscript);
 	VarInfo ReadVarRef(const ExpNode_Var& exp_node_var);
 	VarInfo ReadFuncCall(const ExpNode_FuncCall& exp_node_func_call);
 	VarInfo ReadUnaryOp(const ExpNode_UnaryOp& exp_node_unary_op);

@@ -10,11 +10,12 @@ using std::cout;
 using std::endl;
 
 
-static std::ostream& operator<<(std::ostream& os, std::pair<CodeLineVarType, int> var_info) {
+inline std::ostream& operator<<(std::ostream& os, std::pair<CodeLineVarType, int> var_info) {
 	switch (var_info.first) {
 	case CodeLineVarType::Type::Number: return os << var_info.second;
 	case CodeLineVarType::Type::Local: return os << "t" << var_info.second;
 	case CodeLineVarType::Type::Global: return os << "g" << var_info.second;
+	case CodeLineVarType::Type::Addr: return os << "v" << var_info.second;
 	default: assert(false); return os;
 	}
 }
@@ -34,6 +35,9 @@ public:
 			break;
 		case CodeLineType::UnaryOp:
 			cout << '\t' << VarInfo(line, 0) << " = " << GetOperatorString(line.op) << VarInfo(line, 1) << endl;
+			break;
+		case CodeLineType::Addr:
+			cout << "\t" << VarInfo(line, 0) << " = &" << VarInfo(line, 1) << "[" << VarInfo(line, 2) << "]" << endl;
 			break;
 		case CodeLineType::Load:
 			cout << "\t" << VarInfo(line, 0) << " = " << VarInfo(line, 1) << "[" << VarInfo(line, 2) << "]" << endl;

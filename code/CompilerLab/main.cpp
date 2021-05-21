@@ -21,7 +21,7 @@ const std::string ReadFileToString(const char input_file[]) {
 
 int debug_main() {
 	while (true) {
-		string file; std::cin >> file;
+		string file; std::getline(std::cin, file);
 		string input;
 		try {
 			input = ReadFileToString(file.c_str());
