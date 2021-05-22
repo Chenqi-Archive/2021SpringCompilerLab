@@ -21,52 +21,49 @@ inline std::ostream& operator<<(std::ostream& os, std::pair<CodeLineVarType, int
 }
 
 
-class CodeLinePrinter {
+class AnalyzerDebugHelper {
 private:
 	static std::pair<CodeLineVarType, int> VarInfo(const CodeLine& line, int index) {
 		assert(index >= 0 && index < 3);
 		return { line.var_type[index],  line.var[index] };
 	}
 public:
-	static void PrintCodeLine(const CodeLine& line) {
+	void PrintCodeLine(const CodeLine& line) {
 		switch (line.type) {
 		case CodeLineType::BinaryOp:
-			cout << '\t' << VarInfo(line, 0) << " = " << VarInfo(line, 1) << " " << GetOperatorString(line.op) << " " << VarInfo(line, 2) << endl;
+			cout << VarInfo(line, 0) << " = " << VarInfo(line, 1) << " " << GetOperatorString(line.op) << " " << VarInfo(line, 2) << endl;
 			break;
 		case CodeLineType::UnaryOp:
-			cout << '\t' << VarInfo(line, 0) << " = " << GetOperatorString(line.op) << VarInfo(line, 1) << endl;
+			cout << VarInfo(line, 0) << " = " << GetOperatorString(line.op) << VarInfo(line, 1) << endl;
 			break;
 		case CodeLineType::Addr:
-			cout << "\t" << VarInfo(line, 0) << " = &" << VarInfo(line, 1) << "[" << VarInfo(line, 2) << "]" << endl;
+			cout << VarInfo(line, 0) << " = &" << VarInfo(line, 1) << "[" << VarInfo(line, 2) << "]" << endl;
 			break;
 		case CodeLineType::Load:
-			cout << "\t" << VarInfo(line, 0) << " = " << VarInfo(line, 1) << "[" << VarInfo(line, 2) << "]" << endl;
+			cout << VarInfo(line, 0) << " = " << VarInfo(line, 1) << "[" << VarInfo(line, 2) << "]" << endl;
 			break;
 		case CodeLineType::Store:
-			cout << "\t" << VarInfo(line, 0) << "[" << VarInfo(line, 1) << "]" << " = " << VarInfo(line, 2) << endl;
-			break;
-		case CodeLineType::Parameter:
-			cout << "\tparam " << VarInfo(line, 0) << endl;
+			cout << VarInfo(line, 0) << "[" << VarInfo(line, 1) << "]" << " = " << VarInfo(line, 2) << endl;
 			break;
 		case CodeLineType::FuncCall:
-			line.var_type[1] == CodeLineVarType::Type::Empty ? cout << "\t" : cout << "\t" << VarInfo(line, 1) << " = ";
+			line.var_type[1] == CodeLineVarType::Type::Empty ? cout : cout << VarInfo(line, 1) << " = ";
 			if (IsLibraryFunc(line.var[0])) {
 				cout << "call " << GetLibraryFuncString(line.var[0]) << endl;
 			} else {
 				cout << "call f" << line.var[0] << endl;
 			}
 			break;
-		case CodeLineType::Label:
-			cout << "  label" << line.var[0] << ":" << endl;
+		case CodeLineType::Parameter:
+			cout << "param " << VarInfo(line, 0) << endl;
 			break;
 		case CodeLineType::JumpIf:
-			cout << "\tif " << VarInfo(line, 1) << " " << GetOperatorString(line.op) << " " << VarInfo(line, 2) << " goto label" << line.var[0] << endl;
+			cout << "goto " << GetLabelLineNo(line.var[0]) << " if " << VarInfo(line, 1) << " " << GetOperatorString(line.op) << " " << VarInfo(line, 2) << endl;
 			break;
 		case CodeLineType::Goto:
-			cout << "\tgoto label" << line.var[0] << endl;
+			cout << "goto " << GetLabelLineNo(line.var[0]) << endl;
 			break;
 		case CodeLineType::Return:
-			cout << "\treturn"; 
+			cout << "return";
 			line.var_type[0] == CodeLineVarType::Type::Empty ? cout << endl : cout << " " << VarInfo(line, 0) << endl;
 			break;
 		default:
@@ -74,10 +71,14 @@ public:
 			return;
 		}
 	}
-};
 
+private:
+	ref_ptr<const LabelMap> current_func_label_map = nullptr;
+	uint GetLabelLineNo(uint label_index) {
+		assert(label_index < current_func_label_map->size());
+		return current_func_label_map->operator[](label_index);
+	}
 
-class AnalyzerDebugHelper {
 private:
 	void PrintGlobalVar(const GlobalVarTable& global_var_table) {
 		cout << global_var_table.length << endl;
@@ -89,8 +90,10 @@ private:
 		uint counter = 0;
 		for (auto& global_func : global_func_table) {
 			cout << "func" << library_func_number + counter++ << ": " << global_func.parameter_count << " " << global_func.local_var_length << endl;
-			for (auto& line : global_func.code_block) {
-				CodeLinePrinter::PrintCodeLine(line);
+			current_func_label_map = &global_func.label_map;
+			for (uint i = 0; i < global_func.code_block.size(); ++i) {
+				cout << i << '\t';
+				PrintCodeLine(global_func.code_block[i]);
 			}
 		}
 	}

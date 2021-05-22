@@ -10,9 +10,8 @@ enum class CodeLineType : uchar {
 	Addr,		//  ad  x0  x1  x2
 	Load,		//	ld	x0	x1	x2
 	Store,		//	st	x0	x1	x2
+	FuncCall,	//	cf	f0  x1
 	Parameter,	//	pm	x0
-	FuncCall,	//	cl	f0  x1
-	Label,		//	lb	l0
 	JumpIf,		//	jo	l0	x1	x2
 	Goto,		//	gt	l0
 	Return,		//	rt	x0
@@ -79,10 +78,6 @@ private:
 		var_type{ dest_begin, dest_offset, src }, var{ dest_begin.value, dest_offset.value, src.value }{
 		assert(var_type[0].IsRefOrAddr() && var_type[1].IsIntOrRef() && var_type[2].IsIntOrRef());
 	}
-	CodeLine(const VarInfo& para) :
-		type(CodeLineType::Parameter), op(OperatorType::None), var_type{ para }, var{ para.value }{
-		assert(var_type[0].IsValid());
-	}
 	CodeLine(uint func_index, const VarInfo& dest) :
 		type(CodeLineType::FuncCall), op(OperatorType::None),
 		var_type{ {}, dest }, var{ (int)func_index, dest.value } {
@@ -92,9 +87,9 @@ private:
 		type(CodeLineType::FuncCall), op(OperatorType::None),
 		var_type{}, var{ (int)func_index } {
 	}
-	CodeLine(bool label_tag, uint label_index) :
-		type(CodeLineType::Label), op(OperatorType::None),
-		var_type{}, var{ (int)label_index } {
+	CodeLine(const VarInfo& para) :
+		type(CodeLineType::Parameter), op(OperatorType::None), var_type{ para }, var{ para.value }{
+		assert(var_type[0].IsValid());
 	}
 	CodeLine(uint label_index, OperatorType op, const VarInfo& src1, const VarInfo& src2) :
 		type(CodeLineType::JumpIf), op(op),
@@ -133,17 +128,14 @@ public:
 		// or use UnaryOperation(OperatorType::Add, dest, src);
 		return Store(dest, VarInfo::Number(0), src);
 	}
-	static CodeLine Parameter(const VarInfo& para) {
-		return CodeLine(para);
-	}
 	static CodeLine IntFuncCall(uint func_index, const VarInfo& dest) {
 		return CodeLine(func_index, dest);
 	}
 	static CodeLine VoidFuncCall(uint func_index) {
 		return CodeLine(func_index);
 	}
-	static CodeLine Label(uint label_index) {
-		return CodeLine(true, label_index);
+	static CodeLine Parameter(const VarInfo& para) {
+		return CodeLine(para);
 	}
 	static CodeLine JumpIf(uint label_index, OperatorType op, const VarInfo& src1, const VarInfo& src2) {
 		return CodeLine(label_index, op, src1, src2);
@@ -177,12 +169,14 @@ struct GlobalVarTable {
 
 
 using CodeBlock = vector<CodeLine>;
+using LabelMap = vector<uint>;
 
 struct GlobalFuncDef {
 	uint parameter_count;
 	uint local_var_length;
 	bool is_int;
 	CodeBlock code_block;
+	LabelMap label_map;
 };
 
 using GlobalFuncTable = vector<GlobalFuncDef>;

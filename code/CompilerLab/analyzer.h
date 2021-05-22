@@ -47,6 +47,8 @@ private:
 	CodeBlock current_func_code_block;
 	bool is_return_type_int = false;
 	uint max_local_var_size = 0;
+
+	LabelMap current_func_label_map;
 	uint current_label_count = 0;
 	uint label_break = -1;
 	uint label_continue = -1;
@@ -55,9 +57,10 @@ private:
 	uint current_var_addr_index = -1;
 
 private:
-	VarInfo AllocateTempVar() { return VarInfo::Temp(AllocateVarIndex(1)); }
 	uint AllocateLabel() { return current_label_count++; }
+	void AppendLabel(uint label_index);
 	void AppendCodeLine(CodeLine code_line) { current_func_code_block.push_back(code_line); }
+	VarInfo AllocateTempVar() { return VarInfo::Temp(AllocateVarIndex(1)); }
 	VarInfo AllocateTempVarInitializedWith(int value);
 
 private:

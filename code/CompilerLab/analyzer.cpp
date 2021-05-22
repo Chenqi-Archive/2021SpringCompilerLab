@@ -130,6 +130,7 @@ void Analyzer::FillExpTreeInitializingList(
 				);
 			} else {
 				auto& current_initializer_list = current_initializer->initializer_list;
+				current_initializer++;
 				if (current_initializer_list.empty()) { continue; }
 				auto child_initializer_iterator = current_initializer_list.begin();
 				FillExpTreeInitializingList(
@@ -139,7 +140,6 @@ void Analyzer::FillExpTreeInitializingList(
 				if (child_initializer_iterator != current_initializer_list.end()) {
 					throw compile_error("too many initializer values");
 				}
-				current_initializer++;
 			}
 		}
 	}
@@ -185,6 +185,12 @@ InitializingList Analyzer::GetInitializingList(const ArraySize& array_size, cons
 	return EvalExpTreeInitializingList(GetExpTreeInitializingList(array_size, initializer_list));
 }
 
+void Analyzer::AppendLabel(uint label_index) {
+	if (label_index >= current_func_label_map.size()) { current_func_label_map.resize(label_index + 1, -1); }
+	assert(current_func_label_map[label_index] == -1);
+	current_func_label_map[label_index] = current_func_code_block.size();
+}
+
 VarInfo Analyzer::AllocateTempVarInitializedWith(int value) {
 	VarInfo var_temp = AllocateTempVar();
 	AppendCodeLine(CodeLine::Assign(var_temp, VarInfo::Number(value)));
@@ -222,7 +228,8 @@ VarInfo Analyzer::ReadArraySubscript(const VarEntry& var_entry, const ArraySubsc
 			}
 		}
 		VarInfo var_current_addr = VarInfo::ArrayPtr(vector<uint>(array_dimension.begin() + subscript.size(), array_dimension.end()), var_current_offset.value);
-		AppendCodeLine(CodeLine::Addr(var_current_addr, VarInfo::VarRef(var_entry.is_global, var_entry.index), var_current_offset));
+		VarInfo var_base_addr = var_entry.is_pointer ? VarInfo::ArrayPtr({}, var_entry.index) : VarInfo::VarRef(var_entry.is_global, var_entry.index);
+		AppendCodeLine(CodeLine::Addr(var_current_addr, var_base_addr, var_current_offset));
 		// as dynamically determined variable
 		if (subscript.size() == array_dimension.size()) {
 			if (is_assignment) {
@@ -266,15 +273,14 @@ VarInfo Analyzer::ReadFuncCall(const ExpNode_FuncCall& exp_node_func_call) {
 		}
 		argument_list.push_back(var_argument);
 	}
-	for (auto& var_argument : argument_list) {
-		AppendCodeLine(CodeLine::Parameter(var_argument));
-	}
 	if (func_entry.is_int) {
 		VarInfo var_return_value = AllocateTempVar();
 		AppendCodeLine(CodeLine::IntFuncCall(func_entry.index, var_return_value));
+		for (auto& var_argument : argument_list) { AppendCodeLine(CodeLine::Parameter(var_argument)); }
 		return var_return_value;
 	} else {
 		AppendCodeLine(CodeLine::VoidFuncCall(func_entry.index));
+		for (auto& var_argument : argument_list) { AppendCodeLine(CodeLine::Parameter(var_argument)); }
 		return VarInfo::Void();
 	}
 }
@@ -315,7 +321,7 @@ VarInfo Analyzer::ReadBinaryOp(const ExpNode_BinaryOp& exp_node_binary_op) {
 			AppendCodeLine(CodeLine::JumpIfNot(label_next, var_info_left));
 			VarInfo var_info_right = ReadExpTreeAsIntOrIntRef(exp_node_binary_op.right);
 			AppendCodeLine(CodeLine::Assign(var_temp, var_info_right));
-			AppendCodeLine(CodeLine::Label(label_next));
+			AppendLabel(label_next);
 			return var_temp;
 		} else if (exp_node_binary_op.op == OperatorType::Or) {
 			if (var_info_left.IsNumber()) {
@@ -326,7 +332,7 @@ VarInfo Analyzer::ReadBinaryOp(const ExpNode_BinaryOp& exp_node_binary_op) {
 			AppendCodeLine(CodeLine::JumpIf(label_next, var_info_left));
 			VarInfo var_info_right = ReadExpTreeAsIntOrIntRef(exp_node_binary_op.right);
 			AppendCodeLine(CodeLine::Assign(var_temp, var_info_right));
-			AppendCodeLine(CodeLine::Label(label_next));
+			AppendLabel(label_next);
 			return var_temp;
 		} else {
 			VarInfo var_info_right = ReadExpTreeAsIntOrIntRef(exp_node_binary_op.right);
@@ -387,7 +393,7 @@ void Analyzer::ReadLocalVarDef(const AstNode_VarDef& node_var_def) {
 				// initialize all elements to zero in a loop
 				VarInfo var_temp = AllocateTempVarInitializedWith(0);
 				uint label_loop = AllocateLabel();
-				AppendCodeLine(CodeLine::Label(label_loop));
+				AppendLabel(label_loop);
 				AppendCodeLine(CodeLine::Store(dest_begin, var_temp, VarInfo::Number(0)));
 				AppendCodeLine(CodeLine::BinaryOperation(OperatorType::Add, var_temp, var_temp, VarInfo::Number(1)));
 				AppendCodeLine(CodeLine::JumpIf(label_loop, OperatorType::Less, var_temp, VarInfo::Number((int)length)));
@@ -420,15 +426,15 @@ void Analyzer::ReadIf(const AstNode_If& node_if) {
 	ReadLocalBlock(node_if.then_block);
 	uint label_next = AllocateLabel();
 	AppendCodeLine(CodeLine::Goto(label_next));
-	AppendCodeLine(CodeLine::Label(label_else));
+	AppendLabel(label_else);
 	ReadLocalBlock(node_if.else_block);
-	AppendCodeLine(CodeLine::Label(label_next));
+	AppendLabel(label_next);
 }
 
 void Analyzer::ReadWhile(const AstNode_While& node_while) {
 	uint old_label_continue = label_continue;
 	label_continue = AllocateLabel();
-	AppendCodeLine(CodeLine::Label(label_continue));
+	AppendLabel(label_continue);
 	VarInfo var_expression_value = ReadExpTreeAsIntOrIntRef(node_while.expression);
 	if (!(var_expression_value.IsNumber() && var_expression_value.value == 0)) {
 		uint old_label_break = label_break;
@@ -438,7 +444,7 @@ void Analyzer::ReadWhile(const AstNode_While& node_while) {
 		}
 		ReadLocalBlock(node_while.block);
 		AppendCodeLine(CodeLine::Goto(label_continue));
-		AppendCodeLine(CodeLine::Label(label_break));
+		AppendLabel(label_break);
 		label_break = old_label_break;
 	}
 	label_continue = old_label_continue;
@@ -530,6 +536,7 @@ GlobalFuncDef Analyzer::ReadGlobalFuncDef(const AstNode_FuncDef& func_def) {
 	assert(current_func_code_block.empty());
 	is_return_type_int = func_def.is_int;
 	max_local_var_size = 0;
+	assert(current_func_label_map.empty());
 	current_label_count = 0;
 	assert(label_break == -1);
 	assert(label_continue == -1);
@@ -537,7 +544,10 @@ GlobalFuncDef Analyzer::ReadGlobalFuncDef(const AstNode_FuncDef& func_def) {
 	AddGlobalFunc(func_def.identifier, func_def.is_int, GetParameterTypeList());
 	ReadLocalBlock(func_def.block);
 	RemoveParameterList();
-	return GlobalFuncDef{ func_def.parameter_list.size(), max_local_var_size, func_def.is_int, std::move(current_func_code_block) };
+	return GlobalFuncDef{
+		func_def.parameter_list.size(), max_local_var_size, func_def.is_int,
+		std::move(current_func_code_block), std::move(current_func_label_map)
+	};
 }
 
 uint Analyzer::GetMainFuncIndex() {

@@ -36,33 +36,3 @@ vector<int> VarEntry::GetInitialContent(uint length, const InitializingList& ini
 	}
 	return content;
 }
-
-
-inline std::pair<string_view, FuncEntry> GetLibraryFuncEntry(uint index) {
-	using std::make_pair;
-	static const ParameterArraySize array_size_0({});
-	static const ParameterArraySize array_size_1({ 1 });
-	static const std::pair<string_view, FuncEntry> library_func_table[library_func_number] = {
-		make_pair("getint", FuncEntry{ 0, true, {} }),
-		make_pair("getch", FuncEntry{ 1, true, {} }),
-		make_pair("getarray", FuncEntry{ 2, true, { array_size_1 } }),
-		make_pair("putint", FuncEntry{ 3, false, { array_size_0 } }),
-		make_pair("putch", FuncEntry{ 4, false, { array_size_0 } }),
-		make_pair("putarray", FuncEntry{ 5, false, { array_size_0, array_size_1 } }),
-		make_pair("_sysy_starttime", FuncEntry{ 7, false, { array_size_0 } }),
-		make_pair("_sysy_stoptime", FuncEntry{ 8, false, { array_size_0 } }),
-	};
-	if (!IsLibraryFunc(index)) { throw std::invalid_argument("invalid library function index"); }
-	return library_func_table[index];
-}
-
-string_view GetLibraryFuncString(uint library_func_index) {
-	return GetLibraryFuncEntry(library_func_index).first;
-}
-
-void InitializeLibraryFuncEntries(FuncSymbolTable& func_symbol_table) {
-	assert(func_symbol_table.empty());
-	for (uint i = 0; i < library_func_number; ++i) {
-		func_symbol_table.insert(GetLibraryFuncEntry(i));
-	}
-}

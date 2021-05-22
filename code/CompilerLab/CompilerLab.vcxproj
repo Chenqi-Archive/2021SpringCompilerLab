@@ -173,6 +173,7 @@
     <ClCompile Include="analyzer.cpp" />
     <ClCompile Include="keyword.cpp" />
     <ClCompile Include="lexer.cpp" />
+    <ClCompile Include="library_function.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="parser.cpp" />
     <ClCompile Include="symbol_table.cpp" />

@@ -81,7 +81,7 @@ public:
 
 
 class FuncSymbolTable;
-void InitializeLibraryFuncEntries(FuncSymbolTable& func_symbol_table);
+void InitializeLibraryFuncEntries(FuncSymbolTable& func_symbol_table);  // defined in library_function.cpp
 
 class FuncSymbolTable : public unordered_map<string_view, FuncEntry> {
 public:
