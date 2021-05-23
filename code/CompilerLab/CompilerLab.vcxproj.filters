@@ -66,6 +66,15 @@
     <ClInclude Include="library_function.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="target_code.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="generator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="target_code_printer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">

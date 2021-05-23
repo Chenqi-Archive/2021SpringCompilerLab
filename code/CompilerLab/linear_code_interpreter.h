@@ -11,6 +11,8 @@ using std::vector;
 
 class LinearCodeInterpreter {
 private:
+	static constexpr int global_var_initial_value = 0;
+	static constexpr int local_var_initial_value = 0xCCCCCCCC;
 	static constexpr uint max_stack_size = 65536;
 
 private:
@@ -21,19 +23,19 @@ private:
 	ref_ptr<const LabelMap> current_func_label_map = nullptr;
 
 private:
-	void SetValueAtGlobalAddr(uint index, int value) {
+	void SetValueAtGlobalIndex(uint index, int value) {
 		if (index >= var_stack.size()) { throw std::runtime_error("array subscript out of range"); }
 		var_stack[index] = value;
 	}
-	void SetValueAtLocalAddr(uint index, int value) {
-		SetValueAtGlobalAddr(frame_pointer + index, value);
+	void SetValueAtLocalIndex(uint index, int value) {
+		SetValueAtGlobalIndex(frame_pointer + index, value);
 	}
-	int GetValueAtGlobalAddr(uint index) {
+	int GetValueAtGlobalIndex(uint index) {
 		if (index >= var_stack.size()) { throw std::runtime_error("array subscript out of range"); }
 		return var_stack[index];
 	}
-	int GetValueAtLocalAddr(uint index) {
-		return GetValueAtGlobalAddr(frame_pointer + index);
+	int GetValueAtLocalIndex(uint index) {
+		return GetValueAtGlobalIndex(frame_pointer + index);
 	}
 
 private:
@@ -54,16 +56,16 @@ private:
 	void SetVarValue(VarInfo var, int value) {
 		assert(var.IsRef());
 		switch (var.type) {
-		case VarType::Local: return SetValueAtLocalAddr(var.value, value);
-		case VarType::Global: return SetValueAtGlobalAddr(var.value, value);
+		case VarType::Local: return SetValueAtLocalIndex(var.value, value);
+		case VarType::Global: return SetValueAtGlobalIndex(var.value, value);
 		default: assert(false); return;
 		}
 	}
 	int GetVarValue(VarInfo var) {
 		assert(var.IsIntOrRef());
 		switch (var.type) {
-		case VarType::Local: return GetValueAtLocalAddr(var.value);
-		case VarType::Global: return GetValueAtGlobalAddr(var.value);
+		case VarType::Local: return GetValueAtLocalIndex(var.value);
+		case VarType::Global: return GetValueAtGlobalIndex(var.value);
 		case VarType::Number: return var.value;
 		default: assert(false); return 0;
 		}
@@ -71,7 +73,7 @@ private:
 	void SetAddr(VarInfo var, uint addr) {
 		assert(var.IsAddr());
 		switch (var.type) {
-		case VarType::Addr: return SetValueAtLocalAddr(var.value, addr);
+		case VarType::Addr: return SetValueAtLocalIndex(var.value, addr);
 		default: assert(false); return;
 		}
 	}
@@ -80,7 +82,7 @@ private:
 		switch (var.type) {
 		case VarType::Local: return frame_pointer + var.value + offset;
 		case VarType::Global: return var.value + offset;
-		case VarType::Addr: return GetValueAtLocalAddr(var.value) + offset;
+		case VarType::Addr: return GetValueAtLocalIndex(var.value) + offset;
 		default: assert(false); return 0;
 		}
 	}
@@ -88,8 +90,8 @@ private:
 		assert(var.IsValid());
 		switch (var.type) {
 		case VarType::Addr:
-		case VarType::Local: return GetValueAtLocalAddr(var.value);
-		case VarType::Global: return GetValueAtGlobalAddr(var.value);
+		case VarType::Local: return GetValueAtLocalIndex(var.value);
+		case VarType::Global: return GetValueAtGlobalIndex(var.value);
 		case VarType::Number: return var.value;
 		default: assert(false); return {};
 		}
@@ -97,11 +99,11 @@ private:
 	Argument GetLibraryFuncParameterValue(VarInfo var) {
 		assert(var.IsValid());
 		switch (var.type) {
-		case VarType::Local: return Argument(GetValueAtLocalAddr(var.value));
-		case VarType::Global: return Argument(GetValueAtGlobalAddr(var.value));
+		case VarType::Local: return Argument(GetValueAtLocalIndex(var.value));
+		case VarType::Global: return Argument(GetValueAtGlobalIndex(var.value));
 		case VarType::Number: return Argument(var.value);
 		case VarType::Addr: {
-				uint offset = GetValueAtLocalAddr(var.value);
+				uint offset = GetValueAtLocalIndex(var.value);
 				uint length = var_stack.size() > offset ? var_stack.size() - offset : 0;
 				return Argument(var_stack.data() + offset, length);
 			}
@@ -124,10 +126,10 @@ private:
 			SetAddr(VarInfo(line, 0), GetVarAddr(VarInfo(line, 1), GetVarValue(VarInfo(line, 2))));
 			break;
 		case CodeLineType::Load:
-			SetVarValue(VarInfo(line, 0), GetValueAtGlobalAddr(GetVarAddr(VarInfo(line, 1), GetVarValue(VarInfo(line, 2)))));
+			SetVarValue(VarInfo(line, 0), GetValueAtGlobalIndex(GetVarAddr(VarInfo(line, 1), GetVarValue(VarInfo(line, 2)))));
 			break;
 		case CodeLineType::Store:
-			SetValueAtGlobalAddr(GetVarAddr(VarInfo(line, 0), GetVarValue(VarInfo(line, 1))), GetVarValue(VarInfo(line, 2)));
+			SetValueAtGlobalIndex(GetVarAddr(VarInfo(line, 0), GetVarValue(VarInfo(line, 1))), GetVarValue(VarInfo(line, 2)));
 			break;
 		case CodeLineType::FuncCall:
 			CallFunc(code_block, line_no);
@@ -217,7 +219,7 @@ private:
 		ref_ptr<const LabelMap> old_func_label_map = current_func_label_map;
 		current_func_label_map = &func_def.label_map;
 		current_func_frame_size = func_def.local_var_length;
-		var_stack.insert(var_stack.end(), current_func_frame_size, 0xCCCCCCCC);
+		var_stack.insert(var_stack.end(), current_func_frame_size, local_var_initial_value);
 		frame_pointer += old_func_frame_size;
 		ExecuteCodeBlock(func_def.code_block);
 		var_stack.erase(var_stack.begin() + frame_pointer, var_stack.end());
@@ -230,10 +232,10 @@ private:
 	ref_ptr<const GlobalFuncTable> global_func = nullptr;
 private:
 	void InitializeGlobalVar(const GlobalVarTable& global_var_table) {
-		var_stack.insert(var_stack.end(), global_var_table.length, 0);
+		var_stack.insert(var_stack.end(), global_var_table.length, global_var_initial_value);
 		for (auto [index, value] : global_var_table.initializing_list) {
 			assert(index < global_var_table.length);
-			SetValueAtGlobalAddr(index, value);
+			SetValueAtGlobalIndex(index, value);
 		}
 		current_func_frame_size = global_var_table.length;
 		frame_pointer = 0;

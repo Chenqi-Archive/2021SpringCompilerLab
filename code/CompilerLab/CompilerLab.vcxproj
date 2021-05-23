@@ -153,6 +153,7 @@
   <ItemGroup>
     <ClInclude Include="analyzer.h" />
     <ClInclude Include="core.h" />
+    <ClInclude Include="generator.h" />
     <ClInclude Include="lexer_debug_helper.h" />
     <ClInclude Include="exp_tree.h" />
     <ClInclude Include="keyword.h" />
@@ -167,6 +168,8 @@
     <ClInclude Include="symbol_table.h" />
     <ClInclude Include="syntax_tree.h" />
     <ClInclude Include="linear_code.h" />
+    <ClInclude Include="target_code.h" />
+    <ClInclude Include="target_code_printer.h" />
     <ClInclude Include="type_info.h" />
   </ItemGroup>
   <ItemGroup>
