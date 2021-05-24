@@ -274,6 +274,7 @@ void Generator::ReadBranch(uint label_index, OperatorType op, Register rs1, Regi
 
 void Generator::ReadCodeLine(const CodeBlock& code_block, uint& line_no) {
 	assert(line_no < code_block.size());
+	//out << endl;
 	const CodeLine& line = code_block[line_no];
 	switch (line.type) {
 	case CodeLineType::BinaryOp:
@@ -389,7 +390,10 @@ void Generator::ReadLinearCode(const LinearCode& linear_code) {
 	global_func = &linear_code.global_func_table;
 	main_func_index = linear_code.main_func_index;
 	label_index_base = 0;
+	out << "\t" << ".section .text" << endl;
 	out << "\t" << ".global main" << endl;
 	ReadFuncTable(linear_code.global_func_table);
+	out << endl;
+	out << "\t" << ".section .data" << endl;
 	ReadGlobalVar(linear_code.global_var_table);
 }

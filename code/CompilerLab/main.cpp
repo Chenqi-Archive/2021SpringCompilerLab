@@ -61,17 +61,17 @@ int debug_main() {
 			std::cerr << "semantic error: " << error.what() << std::endl;
 			continue;
 		}
-		//AnalyzerDebugHelper().PrintLinearCode(linear_code);
+		AnalyzerDebugHelper().PrintLinearCode(linear_code);
 
 
-		//LinearCodeInterpreter interpreter; int return_value;
-		//try {
-		//	return_value = interpreter.ExecuteLinearCode(linear_code);
-		//} catch (std::runtime_error& error) {
-		//	std::cerr << "runtime error: " << error.what() << std::endl;
-		//	continue;
-		//}
-		//cout << return_value << endl;
+		LinearCodeInterpreter interpreter; int return_value;
+		try {
+			return_value = interpreter.ExecuteLinearCode(linear_code);
+		} catch (std::runtime_error& error) {
+			std::cerr << "runtime error: " << error.what() << std::endl;
+			continue;
+		}
+		cout << return_value << endl;
 		
 
 		Generator generator(cout);
