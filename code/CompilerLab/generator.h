@@ -33,8 +33,8 @@ private:
 	void BinaryOpReg(Register reg_dest, OperatorType op, Register reg_src1, Register reg_src2);
 	void UnaryOpReg(Register reg_dest, OperatorType op, Register reg_src);
 	void AddReg(Register reg_dest, Register reg_src1, Register reg_src2);
-	void AddRegNumber(Register reg_dest, Register reg_src1, int value);
-	void ShiftLeftRegNumber(Register reg_dest, Register reg_src1, uint value);
+	void AddRegNumber(Register reg_dest, Register reg_src, int value);
+	void ShiftLeftRegNumber(Register reg_dest, Register reg_src, uint value);
 private:
 	void LoadValueNumber(Register reg, int value);
 	void LoadValueGlobalVar(Register reg, uint offset);

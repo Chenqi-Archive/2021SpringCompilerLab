@@ -67,6 +67,10 @@ public:
 		if (index < 32) { return index - 25; }
 		assert(false); return -1;
 	}
+public:
+	bool operator==(const Register& right) const {
+		return index == right.index;
+	}
 };
 
 

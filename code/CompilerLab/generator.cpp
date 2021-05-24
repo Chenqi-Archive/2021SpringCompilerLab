@@ -90,18 +90,23 @@ void Generator::AddReg(Register reg_dest, Register reg_src1, Register reg_src2) 
 	return BinaryOpReg(reg_dest, OperatorType::Add, reg_src1, reg_src2);
 }
 
-void Generator::AddRegNumber(Register reg_dest, Register reg_src1, int value) {
+void Generator::AddRegNumber(Register reg_dest, Register reg_src, int value) {
 	if (value >= min_imm12_int_value && value <= max_imm12_int_value) {
-		out << "\t" << "addi " << reg_dest << ", " << reg_src1 << ", " << value << endl;
+		out << "\t" << "addi " << reg_dest << ", " << reg_src << ", " << value << endl;
 	} else {
-		out << "\t" << "lui " << reg_dest << ", %hi(" << value << ")" << endl;
-		out << "\t" << "addi " << reg_dest << ", " << reg_src1 << ", %lo(" << value << ")" << endl;
+		if (reg_dest == reg_src) {
+			LoadValueNumber(t0, value);
+			AddReg(reg_dest, reg_src, t0);
+		} else {
+			out << "\t" << "lui " << reg_dest << ", %hi(" << value << ")" << endl;
+			out << "\t" << "addi " << reg_dest << ", " << reg_src << ", %lo(" << value << ")" << endl;
+		}
 	}
 }
 
-void Generator::ShiftLeftRegNumber(Register reg_dest, Register reg_src1, uint value) {
+void Generator::ShiftLeftRegNumber(Register reg_dest, Register reg_src, uint value) {
 	assert(value > 0 && value < 32);
-	out << "\t" << "slli " << reg_dest << ", " << reg_src1 << ", " << value << endl;
+	out << "\t" << "slli " << reg_dest << ", " << reg_src << ", " << value << endl;
 }
 
 void Generator::LoadValueNumber(Register reg, int value) {
