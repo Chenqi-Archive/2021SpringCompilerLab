@@ -233,7 +233,6 @@ VarInfo Analyzer::ReadArraySubscript(const VarEntry& var_entry, const ArraySubsc
 		// as dynamically determined variable
 		if (subscript.size() == array_dimension.size()) {
 			if (is_assignment) {
-				assert(current_var_addr_index == -1);
 				current_var_addr_index = var_current_addr.value;
 				VarInfo var_temp = AllocateTempVar();
 				AppendCodeLine(CodeLine::Load(var_temp, var_current_addr, VarInfo::Number(0)));
