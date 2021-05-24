@@ -85,22 +85,46 @@ int debug_main() {
 // Usage: 
 // $ compiler -S testcase.c -o testcase.S
 int main(int argc, const char* argv[]) {
+	if (argc != 5) { std::cerr << "invalid argument count"; return 0; }
+	string input_file = argv[2];
+	string output_file = argv[4];
 
-	// debug
-	return debug_main();
-	// debug end
-
+	string input;
 	try {
-		if (argc != 5) { throw std::invalid_argument("invalid argument count"); }
-
-		const char* input_file = argv[2];
-		const char* output_file = argv[4];
-
-
+		input = ReadFileToString(input_file.c_str());
 	} catch (std::invalid_argument& error) {
-		std::cerr << "Error: " << error.what();
+		std::cerr << error.what() << std::endl;
 		return 0;
 	}
+
+	Lexer lexer; LexTree lex_tree;
+	try {
+		lex_tree = lexer.ReadString(input);
+	} catch (compile_error& error) {
+		std::cerr << "lex error: " << error.what() << std::endl;
+		return 0;
+	}
+
+	Parser parser; SyntaxTree syntax_tree;
+	try {
+		syntax_tree = parser.ReadLexTree(lex_tree);
+	} catch (compile_error& error) {
+		std::cerr << "syntax error: " << error.what() << std::endl;
+		return 0;
+	}
+
+	Analyzer analyzer; LinearCode linear_code;
+	try {
+		linear_code = analyzer.ReadSyntaxTree(syntax_tree);
+	} catch (compile_error& error) {
+		std::cerr << "semantic error: " << error.what() << std::endl;
+		return 0;
+	}
+
+	std::ofstream output(output_file);
+	if (!output) { std::cerr << "invalid output file"; return 0; }
+	Generator generator(output);
+	generator.ReadLinearCode(linear_code);
 
 	return 0;
 }
