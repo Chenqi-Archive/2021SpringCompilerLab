@@ -99,6 +99,11 @@ void Generator::AddRegNumber(Register reg_dest, Register reg_src1, int value) {
 	}
 }
 
+void Generator::ShiftLeftRegNumber(Register reg_dest, Register reg_src1, uint value) {
+	assert(value > 0 && value < 32);
+	out << "\t" << "slli " << reg_dest << ", " << reg_src1 << ", " << value << endl;
+}
+
 void Generator::LoadValueNumber(Register reg, int value) {
 	out << "\t" << "li " << reg << ", " << value << endl;
 }
@@ -291,12 +296,14 @@ void Generator::ReadCodeLine(const CodeBlock& code_block, uint& line_no) {
 	case CodeLineType::Addr:
 		LoadAddrVar(t1, VarInfo(line, 1));
 		LoadValueVar(t2, VarInfo(line, 2));
+		ShiftLeftRegNumber(t2, t2, 2);
 		AddReg(t1, t1, t2);
 		StoreAddrVar(VarInfo(line, 0), t1);
 		break;
 	case CodeLineType::Load:
 		LoadAddrVar(t1, VarInfo(line, 1));
 		LoadValueVar(t2, VarInfo(line, 2));
+		ShiftLeftRegNumber(t2, t2, 2);
 		AddReg(t1, t1, t2);
 		LoadValueGlobalAddr(t1, t1);
 		StoreValueVar(VarInfo(line, 0), t1);
@@ -304,6 +311,7 @@ void Generator::ReadCodeLine(const CodeBlock& code_block, uint& line_no) {
 	case CodeLineType::Store:
 		LoadAddrVar(t1, VarInfo(line, 0));
 		LoadValueVar(t2, VarInfo(line, 1));
+		ShiftLeftRegNumber(t2, t2, 2);
 		AddReg(t1, t1, t2);
 		LoadValueVar(t2, VarInfo(line, 2));
 		StoreValueGlobalAddr(t1, t2);
