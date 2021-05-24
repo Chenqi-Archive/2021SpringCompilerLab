@@ -358,7 +358,7 @@ void Generator::ReadFuncDef(const GlobalFuncDef& func_def) {
 	LoadValueLocalVar(ra, stack_size - 4);
 	AddRegNumber(sp, sp, stack_size);
 	out << "\t" << "ret" << endl;
-	label_index_base += func_def.label_map.size();
+	label_index_base += (uint)func_def.label_map.size();
 }
 
 void Generator::ReadFuncTable(const GlobalFuncTable& global_func_table) {

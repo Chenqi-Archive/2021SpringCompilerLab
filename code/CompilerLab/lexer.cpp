@@ -130,11 +130,36 @@ void Lexer::AppendOperator(char op_char) {
     AppendOperator(op);
 }
 
+void Lexer::ReadRoundBracket(string_const_iterator& it) {
+    if (GetCharType(*it) == CharType::WhiteSpace) { ReadWhiteSpace(it); }
+    if (*it != '(') { throw compile_error("expected a left bracket"); } it++;
+    if (GetCharType(*it) == CharType::WhiteSpace) { ReadWhiteSpace(it); }
+    if (*it != ')') { throw compile_error("expected a right bracket"); } it++;
+}
+
+void Lexer::ReadMacro(string_view str, string_const_iterator& it) {
+    if (str == "starttime") {
+        AppendItem(std::make_unique<Item_Identifier>("_sysy_starttime"));
+        auto argument_block = std::make_unique<Item_Block>(BracketType::Round);
+        argument_block->item_list.push_back(std::make_unique<Item_Integer>(it.line_no));
+        AppendItem(std::move(argument_block));
+        ReadRoundBracket(it);
+    } else if (str == "stoptime") {
+        AppendItem(std::make_unique<Item_Identifier>("_sysy_stoptime"));
+        auto argument_block = std::make_unique<Item_Block>(BracketType::Round);
+        argument_block->item_list.push_back(std::make_unique<Item_Integer>(it.line_no));
+        AppendItem(std::move(argument_block));
+        ReadRoundBracket(it);
+    } else {
+        return AppendWord(str);
+    }
+}
+
 void Lexer::ReadWord(string_const_iterator& it) {
     const char* begin = it; uint count = 0;
     for (; GetCharType(*it) == CharType::Word; it++, count++) {}
     assert(count > 0);
-    AppendWord(string_view(begin, count));
+    ReadMacro(string_view(begin, count), it);
 }
 
 void Lexer::ReadOperator(string_const_iterator& it) {

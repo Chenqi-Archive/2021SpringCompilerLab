@@ -82,8 +82,8 @@ inline const LibraryFuncEntry& GetLibraryFuncEntry(uint index) {
 		{"putint", FuncEntry{ 3, false, { array_size_0 } }, PutInt},
 		{"putch", FuncEntry{ 4, false, { array_size_0 } }, PutCh},
 		{"putarray", FuncEntry{ 5, false, { array_size_0, array_size_1 } }, PutArray},
-		{"_sysy_starttime", FuncEntry{ 7, false, { array_size_0 } }, StartTime},
-		{"_sysy_stoptime", FuncEntry{ 8, false, { array_size_0 } }, StopTime},
+		{"_sysy_starttime", FuncEntry{ 6, false, { array_size_0 } }, StartTime},
+		{"_sysy_stoptime", FuncEntry{ 7, false, { array_size_0 } }, StopTime},
 	};
 	if (!IsLibraryFunc(index)) { throw std::invalid_argument("invalid library function index"); }
 	return library_func_table[index];

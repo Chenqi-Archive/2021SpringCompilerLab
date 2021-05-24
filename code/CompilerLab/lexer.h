@@ -33,7 +33,21 @@ private:
     void AppendOperator(char op);
 
 private:
-    using string_const_iterator = const char*;
+    struct string_const_iterator {
+    public:
+        ref_ptr<const char> it;
+        uint line_no;
+    public:
+        string_const_iterator(ref_ptr<const char> it) : it(it), line_no(1) {}
+        char operator*() const { return *it; }
+        void operator++() { if (*it == '\n') { line_no++; } it++; }
+        void operator++(int) { if (*it == '\n') { line_no++; } it++; }
+        operator ref_ptr<const char>() { return it; }
+    };
+
+private:
+    void ReadRoundBracket(string_const_iterator& it);
+    void ReadMacro(string_view str, string_const_iterator& it);
 
 private:
     void ReadWord(string_const_iterator& it);

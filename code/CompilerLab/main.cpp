@@ -85,6 +85,8 @@ int debug_main() {
 // Usage: 
 // $ compiler -S testcase.c -o testcase.S
 int main(int argc, const char* argv[]) {
+	//return debug_main();
+
 	if (argc != 5) { std::cerr << "invalid argument count"; return 0; }
 	string input_file = argv[2];
 	string output_file = argv[4];

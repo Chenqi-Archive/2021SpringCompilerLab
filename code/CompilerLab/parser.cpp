@@ -528,8 +528,8 @@ void Parser::ReadNode(item_const_iterator& it) {
 		case KeywordType::If: return ReadNodeIf(it);
 		case KeywordType::Else: throw compile_error("\"else\" mismatch");
 		case KeywordType::While: return ReadNodeWhile(it);
-		case KeywordType::Break: return ReadNodeContinue(it);
-		case KeywordType::Continue: return ReadNodeBreak(it);
+		case KeywordType::Break: return ReadNodeBreak(it);
+		case KeywordType::Continue: return ReadNodeContinue(it);
 		case KeywordType::Return: return ReadNodeReturn(it);
 		}
 		assert(false); return;
