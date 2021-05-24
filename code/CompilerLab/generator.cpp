@@ -154,7 +154,7 @@ void Generator::LoadAddrLocalVar(Register reg, uint offset) {
 	} else {
 		out << "\t" << "lui " << t0 << ", %hi(" << offset << ")" << endl;
 		out << "\t" << "add " << t0 << ", " << t0 << ", " << sp << endl;
-		out << "\t" << "addi " << t0 << ", " << t0 << ", %lo(" << offset << ")" << endl;
+		out << "\t" << "addi " << reg << ", " << t0 << ", %lo(" << offset << ")" << endl;
 	}
 }
 
