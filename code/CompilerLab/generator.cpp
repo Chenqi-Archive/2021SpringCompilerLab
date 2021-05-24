@@ -389,6 +389,7 @@ void Generator::ReadLinearCode(const LinearCode& linear_code) {
 	global_func = &linear_code.global_func_table;
 	main_func_index = linear_code.main_func_index;
 	label_index_base = 0;
+	out << "\t" << ".global main" << endl;
 	ReadFuncTable(linear_code.global_func_table);
 	ReadGlobalVar(linear_code.global_var_table);
 }
