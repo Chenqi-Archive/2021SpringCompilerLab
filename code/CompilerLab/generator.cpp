@@ -47,11 +47,11 @@ void Generator::BinaryOpReg(Register reg_dest, OperatorType op, Register reg_src
 		break;
 	case OperatorType::Equal:
 		out << "\t" << "xor " << reg_dest << ", " << reg_src1 << ", " << reg_src2 << endl;
-		out << "\t" << "snez " << reg_dest << ", " << reg_dest << endl;
+		out << "\t" << "seqz " << reg_dest << ", " << reg_dest << endl;
 		break;
 	case OperatorType::NotEqual:
 		out << "\t" << "xor " << reg_dest << ", " << reg_src1 << ", " << reg_src2 << endl;
-		out << "\t" << "seqz " << reg_dest << ", " << reg_dest << endl;
+		out << "\t" << "snez " << reg_dest << ", " << reg_dest << endl;
 		break;
 	case OperatorType::Less:
 		out << "\t" << "slt " << reg_dest << ", " << reg_src1 << ", " << reg_src2 << endl;
