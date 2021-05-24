@@ -1,6 +1,7 @@
 #include "lexer.h"
 #include "parser.h"
 #include "analyzer.h"
+#include "generator.h"
 
 #include "lexer_debug_helper.h"
 #include "parser_debug_helper.h"
@@ -63,15 +64,19 @@ int debug_main() {
 		//AnalyzerDebugHelper().PrintLinearCode(linear_code);
 
 
-		LinearCodeInterpreter interpreter; int return_value;
-		try {
-			return_value = interpreter.ExecuteLinearCode(linear_code);
-		} catch (std::runtime_error& error) {
-			std::cerr << "runtime error: " << error.what() << std::endl;
-			continue;
-		}
-		cout << return_value << endl;
+		//LinearCodeInterpreter interpreter; int return_value;
+		//try {
+		//	return_value = interpreter.ExecuteLinearCode(linear_code);
+		//} catch (std::runtime_error& error) {
+		//	std::cerr << "runtime error: " << error.what() << std::endl;
+		//	continue;
+		//}
+		//cout << return_value << endl;
 		
+
+		Generator generator(cout);
+		generator.ReadLinearCode(linear_code);
+
 
 	}
 }

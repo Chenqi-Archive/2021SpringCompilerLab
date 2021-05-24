@@ -87,9 +87,9 @@ private:
 		}
 	}
 	void PrintGlobalFunc(const GlobalFuncTable& global_func_table) {
-		uint counter = 0;
+		uint counter = library_func_number;
 		for (auto& global_func : global_func_table) {
-			cout << "func" << library_func_number + counter++ << ": " << global_func.parameter_count << " " << global_func.local_var_length << endl;
+			cout << "func" << counter++ << ": " << global_func.parameter_count << " " << global_func.local_var_length << endl;
 			current_func_label_map = &global_func.label_map;
 			for (uint i = 0; i < global_func.code_block.size(); ++i) {
 				cout << i << '\t';
