@@ -104,7 +104,7 @@ private:
 		case VarType::Number: return Argument(var.value);
 		case VarType::Addr: {
 				uint offset = GetValueAtLocalIndex(var.value);
-				uint length = var_stack.size() > offset ? var_stack.size() - offset : 0;
+				uint length = (uint)var_stack.size() > offset ? (uint)var_stack.size() - offset : 0;
 				return Argument(var_stack.data() + offset, length);
 			}
 		default: assert(false); return {};

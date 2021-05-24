@@ -1,8 +1,17 @@
 #pragma once
 
 
+#ifdef _MSC_VER
+
 #define ABSTRACT_BASE _declspec(novtable)
 #define pure = 0
+
+#else
+
+#define ABSTRACT_BASE
+#define pure
+
+#endif
 
 
 #include <cassert>

@@ -101,7 +101,7 @@ void InitializeLibraryFuncEntries(FuncSymbolTable& func_symbol_table) {
 }
 
 uint GetLibraryFuncParameterCount(uint library_func_index) {
-	return GetLibraryFuncEntry(library_func_index).entry.parameter_type_list.size();
+	return (uint)GetLibraryFuncEntry(library_func_index).entry.parameter_type_list.size();
 }
 
 void CallLibraryFunc(uint library_func_index, const Argument& arg0, const Argument& arg1, int& return_value) {

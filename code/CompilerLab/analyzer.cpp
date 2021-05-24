@@ -188,7 +188,7 @@ InitializingList Analyzer::GetInitializingList(const ArraySize& array_size, cons
 void Analyzer::AppendLabel(uint label_index) {
 	if (label_index >= current_func_label_map.size()) { current_func_label_map.resize(label_index + 1, -1); }
 	assert(current_func_label_map[label_index] == -1);
-	current_func_label_map[label_index] = current_func_code_block.size();
+	current_func_label_map[label_index] = (uint)current_func_code_block.size();
 }
 
 VarInfo Analyzer::AllocateTempVarInitializedWith(int value) {
@@ -545,7 +545,7 @@ GlobalFuncDef Analyzer::ReadGlobalFuncDef(const AstNode_FuncDef& func_def) {
 	ReadLocalBlock(func_def.block);
 	RemoveParameterList();
 	return GlobalFuncDef{
-		func_def.parameter_list.size(), max_local_var_size, func_def.is_int,
+		(uint)func_def.parameter_list.size(), max_local_var_size, func_def.is_int,
 		std::move(current_func_code_block), std::move(current_func_label_map)
 	};
 }

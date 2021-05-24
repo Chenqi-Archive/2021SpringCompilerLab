@@ -36,8 +36,6 @@ public:
 	const DerivedClass& As() const { return static_cast<const DerivedClass&>(*this); }
 };
 
-static_assert(sizeof(Item_Base) == 8);
-
 
 struct Item_Keyword : public Item_Base {
 public:
