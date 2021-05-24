@@ -183,9 +183,9 @@ int ReadIntegerHex(string_view str) {
 		if (IsNumber(ch)) {
 			res = res * 16 + (ch - '0');
 		} else if (IsHexLetterLowercase(ch)) {
-			res = res * 16 + (ch - 'a');
+			res = res * 16 + (ch - 'a') + 10;
 		} else if (IsHexLetterUppercase(ch)) {
-			res = res * 16 + (ch - 'A');
+			res = res * 16 + (ch - 'A') + 10;
 		} else {
 			throw compile_error("invalid integer literal");
 		}
