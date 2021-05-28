@@ -223,8 +223,12 @@ VarInfo Analyzer::ReadArraySubscript(const VarEntry& var_entry, const ArraySubsc
 		if (!index.empty()) {
 			VarInfo var_mul_temp = AllocateTempVar();
 			for (auto& [size, var] : index) {
-				AppendCodeLine(CodeLine::BinaryOperation(OperatorType::Mul, var_mul_temp, var, VarInfo::Number(size)));
-				AppendCodeLine(CodeLine::BinaryOperation(OperatorType::Add, var_current_offset, var_current_offset, var_mul_temp));
+				if (size == 1) {
+					AppendCodeLine(CodeLine::BinaryOperation(OperatorType::Add, var_current_offset, var_current_offset, var));
+				} else {
+					AppendCodeLine(CodeLine::BinaryOperation(OperatorType::Mul, var_mul_temp, var, VarInfo::Number(size)));
+					AppendCodeLine(CodeLine::BinaryOperation(OperatorType::Add, var_current_offset, var_current_offset, var_mul_temp));
+				}
 			}
 		}
 		VarInfo var_current_addr = VarInfo::ArrayPtr(vector<uint>(array_dimension.begin() + subscript.size(), array_dimension.end()), var_current_offset.value);
